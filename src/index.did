@@ -1,0 +1,47 @@
+type Donor = record {
+  id : text;
+  updated_at : opt nat64;
+  name : text;
+  blood_type : text;
+  created_date : nat64;
+};
+type Hospital = record {
+  id : text;
+  updated_at : opt nat64;
+  name : text;
+  created_date : nat64;
+  location : text;
+};
+type Pledge = record {
+  id : text;
+  patient_id : text;
+  updated_at : opt nat64;
+  donor_id : text;
+  amount : text;
+  created_date : nat64;
+};
+type PledgePayload = record {
+  patient_id : text;
+  donor_id : text;
+  amount : text;
+};
+type PledgeResponse = record { msg : text; amount : float64 };
+type _AzleResult = variant { Ok : vec Donor; Err : text };
+type _AzleResult_1 = variant { Ok : vec Hospital; Err : text };
+type _AzleResult_2 = variant { Ok : vec Pledge; Err : text };
+service : () -> {
+  addDonor : (text, text) -> (text);
+  addPatient : (text, text) -> (text);
+  deleteDonor : (text) -> (text);
+  deletePatient : (text) -> (text);
+  deletePledge : (text) -> (text);
+  getDonors : () -> (_AzleResult) query;
+  getHospitals : () -> (_AzleResult_1) query;
+  getPatients : () -> (_AzleResult) query;
+  getPledgesForPatient : (text) -> (_AzleResult_2) query;
+  initBloodDrive : () -> (text);
+  makePledge : (PledgePayload) -> (PledgeResponse);
+  updateDonor : (text, text, text) -> (text);
+  updatePatient : (text, text, text) -> (text);
+  updatePledge : (text, text) -> (text);
+}
