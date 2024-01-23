@@ -53,6 +53,14 @@ const patientStorage = new StableBTreeMap<string, Patient>(1, 44, 512);
 const donorStorage = new StableBTreeMap<string, Donor>(2, 44, 512);
 const pledgeStorage = new StableBTreeMap<string, Pledge>(3, 44, 512);
 
+// Helper function to get entity from storage
+function getEntity<T>(storage: StableBTreeMap<string, T>, id: string): T | null {
+  return match(storage.get(id), {
+    Some: (entity) => entity,
+    None: () => null,
+  });
+}
+
 // Function to initialize the blood donation drive
 $update;
 export function initBloodDrive(): string {
@@ -78,7 +86,7 @@ $query;
 export function getHospitals(): Result<Vec<Hospital>, string> {
   const hospitals = hospitalStorage.values();
   if (hospitals.length === 0) {
-    return Result.Err("No hospitals found");
+    throw new Error("No hospitals found");
   }
   return Result.Ok(hospitals);
 }
@@ -88,7 +96,7 @@ $query;
 export function getPatients(): Result<Vec<Patient>, string> {
   const patients = patientStorage.values();
   if (patients.length === 0) {
-    return Result.Err("No patients found");
+    throw new Error("No patients found");
   }
   return Result.Ok(patients);
 }
@@ -98,7 +106,7 @@ $query;
 export function getDonors(): Result<Vec<Donor>, string> {
   const donors = donorStorage.values();
   if (donors.length === 0) {
-    return Result.Err("No donors found");
+    throw new Error("No donors found");
   }
   return Result.Ok(donors);
 }
@@ -134,17 +142,10 @@ export function addDonor(name: string, blood_type: string): string {
 // Function to handle a blood donation pledge
 $update;
 export function makePledge(payload: PledgePayload): PledgeResponse {
-  const donor = match(donorStorage.get(payload.donor_id), {
-    Some: (donor) => donor,
-    None: () => ({} as unknown as Donor),
-  });
+  const donor = getEntity(donorStorage, payload.donor_id);
+  const patient = getEntity(patientStorage, payload.patient_id);
 
-  const patient = match(patientStorage.get(payload.patient_id), {
-    Some: (patient) => patient,
-    None: () => ({} as unknown as Patient),
-  });
-
-  if (!donor.id || !patient.id) {
+  if (!donor || !patient) {
     return {
       msg: "Invalid donor or patient ID",
       amount: 0,
@@ -172,7 +173,7 @@ $query;
 export function getPledgesForPatient(patient_id: string): Result<Vec<Pledge>, string> {
   const pledges = pledgeStorage.values().filter((pledge) => pledge.patient_id === patient_id);
   if (pledges.length === 0) {
-    return Result.Err("No pledges found for the specified patient");
+    throw new Error("No pledges found for the specified patient");
   }
   return Result.Ok(pledges);
 }
@@ -180,12 +181,9 @@ export function getPledgesForPatient(patient_id: string): Result<Vec<Pledge>, st
 // Function to update patient information
 $update;
 export function updatePatient(id: string, name: string, blood_type: string): string {
-  const existingPatient = match(patientStorage.get(id), {
-    Some: (patient) => patient,
-    None: () => ({} as unknown as Patient),
-  });
+  const existingPatient = getEntity(patientStorage, id);
 
-  if (existingPatient.id) {
+  if (existingPatient) {
     existingPatient.name = name;
     existingPatient.blood_type = blood_type;
     existingPatient.updated_at = Opt.Some(ic.time());
@@ -193,18 +191,15 @@ export function updatePatient(id: string, name: string, blood_type: string): str
     return existingPatient.id;
   }
 
-  return "Patient not found";
+  throw new Error("Patient not found");
 }
 
 // Function to update donor information
 $update;
 export function updateDonor(id: string, name: string, blood_type: string): string {
-  const existingDonor = match(donorStorage.get(id), {
-    Some: (donor) => donor,
-    None: () => ({} as unknown as Donor),
-  });
+  const existingDonor = getEntity(donorStorage, id);
 
-  if (existingDonor.id) {
+  if (existingDonor) {
     existingDonor.name = name;
     existingDonor.blood_type = blood_type;
     existingDonor.updated_at = Opt.Some(ic.time());
@@ -212,73 +207,61 @@ export function updateDonor(id: string, name: string, blood_type: string): strin
     return existingDonor.id;
   }
 
-  return "Donor not found";
+  throw new Error("Donor not found");
 }
 
 // Function to delete a patient
 $update;
 export function deletePatient(id: string): string {
-  const existingPatient = match(patientStorage.get(id), {
-    Some: (patient) => patient,
-    None: () => ({} as unknown as Patient),
-  });
+  const existingPatient = getEntity(patientStorage, id);
 
-  if (existingPatient.id) {
+  if (existingPatient) {
     patientStorage.remove(id);
     return `Patient with ID: ${id} removed successfully`;
   }
 
-  return "Patient not found";
+  throw new Error("Patient not found");
 }
 
 // Function to delete a donor
 $update;
 export function deleteDonor(id: string): string {
-  const existingDonor = match(donorStorage.get(id), {
-    Some: (donor) => donor,
-    None: () => ({} as unknown as Donor),
-  });
+  const existingDonor = getEntity(donorStorage, id);
 
-  if (existingDonor.id) {
+  if (existingDonor) {
     donorStorage.remove(id);
     return `Donor with ID: ${id} removed successfully`;
   }
 
-  return "Donor not found";
+  throw new Error("Donor not found");
 }
 
 // Function to update a blood donation pledge
 $update;
 export function updatePledge(id: string, amount: string): string {
-  const existingPledge = match(pledgeStorage.get(id), {
-    Some: (pledge) => pledge,
-    None: () => ({} as unknown as Pledge),
-  });
+  const existingPledge = getEntity(pledgeStorage, id);
 
-  if (existingPledge.id) {
+  if (existingPledge) {
     existingPledge.amount = amount;
     existingPledge.updated_at = Opt.Some(ic.time());
     pledgeStorage.insert(existingPledge.id, existingPledge);
     return `Pledge with ID: ${id} updated successfully`;
   }
 
-  return "Pledge not found";
+  throw new Error("Pledge not found");
 }
 
 // Function to delete a blood donation pledge
 $update;
 export function deletePledge(id: string): string {
-  const existingPledge = match(pledgeStorage.get(id), {
-    Some: (pledge) => pledge,
-    None: () => ({} as unknown as Pledge),
-  });
+  const existingPledge = getEntity(pledgeStorage, id);
 
-  if (existingPledge.id) {
+  if (existingPledge) {
     pledgeStorage.remove(id);
     return `Pledge with ID: ${id} removed successfully`;
   }
 
-  return "Pledge not found";
+  throw new Error("Pledge not found");
 }
 
 // Mocking the 'crypto' object for testing purposes
