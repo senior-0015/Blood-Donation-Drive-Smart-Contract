@@ -12,6 +12,23 @@ type Hospital = record {
   created_date : nat64;
   location : text;
 };
+type MedicalRecord = record {
+  id : text;
+  patient_id : text;
+  updated_at : opt nat64;
+  prescription : text;
+  diagnosis : text;
+  doctor_name : text;
+  created_date : nat64;
+};
+type Organ = record {
+  id : text;
+  patient_id : text;
+  updated_at : opt nat64;
+  name : text;
+  donor_id : text;
+  created_date : nat64;
+};
 type Pledge = record {
   id : text;
   patient_id : text;
@@ -28,20 +45,38 @@ type PledgePayload = record {
 type PledgeResponse = record { msg : text; amount : float64 };
 type _AzleResult = variant { Ok : vec Donor; Err : text };
 type _AzleResult_1 = variant { Ok : vec Hospital; Err : text };
-type _AzleResult_2 = variant { Ok : vec Pledge; Err : text };
+type _AzleResult_2 = variant { Ok : vec MedicalRecord; Err : text };
+type _AzleResult_3 = variant { Ok : vec Organ; Err : text };
+type _AzleResult_4 = variant { Ok : vec Pledge; Err : text };
 service : {
   addDonor : (text, text) -> (text);
+  addMedicalRecord : (text, text, text, text) -> (text);
+  addOrgan : (text, text, text) -> (text);
   addPatient : (text, text) -> (text);
   deleteDonor : (text) -> (text);
+  deleteMedicalRecord : (text) -> (text);
+  deleteOrgan : (text) -> (text);
   deletePatient : (text) -> (text);
   deletePledge : (text) -> (text);
+  findMatchingDonorsForPatient : (text, text) -> (_AzleResult) query;
+  findPotentialDonorsForPatient : (text) -> (_AzleResult) query;
   getDonors : () -> (_AzleResult) query;
   getHospitals : () -> (_AzleResult_1) query;
+  getMedicalRecordsForPatient : (text) -> (_AzleResult_2) query;
+  getOrganDonorsForPatient : (text) -> (_AzleResult) query;
+  getOrgans : () -> (_AzleResult_3) query;
+  getOrgansDonatedByDonor : (text) -> (_AzleResult_3) query;
+  getOrgansReceivedByPatient : (text) -> (_AzleResult_3) query;
   getPatients : () -> (_AzleResult) query;
-  getPledgesForPatient : (text) -> (_AzleResult_2) query;
+  getPledgeSummary : () -> (float64) query;
+  getPledgesForPatient : (text) -> (_AzleResult_4) query;
   initBloodDrive : () -> (text);
   makePledge : (PledgePayload) -> (PledgeResponse);
+  removeExpiredPledges : (float64) -> (text);
   updateDonor : (text, text, text) -> (text);
+  updateHospitalInfo : (text, text, text) -> (text);
+  updateMedicalRecord : (text, text, text) -> (text);
+  updateOrgan : (text, text) -> (text);
   updatePatient : (text, text, text) -> (text);
   updatePledge : (text, text) -> (text);
 }

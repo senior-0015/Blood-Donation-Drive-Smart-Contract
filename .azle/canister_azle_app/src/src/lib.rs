@@ -27,7 +27,7 @@ thread_local! {
     std::cell::RefCell::new("".to_string()); static MANUAL_REF_CELL : std::cell::RefCell
     < bool > = std::cell::RefCell::new(false);
 }
-static MAIN_JS: &'static str = "\n            // TODO we should centralize/standardize where we add global variables to the JS, we are doing this in multiple places (i.e. the exports variable is not here, found in init/post_upgrade)\n            globalThis.console = {\n                ...globalThis.console,\n                log: (...args) => {\n                    ic.print(...args);\n                }\n            };\n\n            \nObject.defineProperty(exports, \"__esModule\", {\n    value: true\n});\nexports.deletePledge = exports.updatePledge = exports.deleteDonor = exports.deletePatient = exports.updateDonor = exports.updatePatient = exports.getPledgesForPatient = exports.makePledge = exports.addDonor = exports.addPatient = exports.getDonors = exports.getPatients = exports.getHospitals = exports.initBloodDrive = exports.Principal = void 0;\nvar __create = Object.create;\nvar __defProp = Object.defineProperty;\nvar __getOwnPropDesc = Object.getOwnPropertyDescriptor;\nvar __getOwnPropNames = Object.getOwnPropertyNames;\nvar __getProtoOf = Object.getPrototypeOf;\nvar __hasOwnProp = Object.prototype.hasOwnProperty;\nvar __markAsModule = (target)=>__defProp(target, \"__esModule\", {\n        value: true\n    })\n;\nvar __commonJS = (cb, mod)=>function __require() {\n        return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = {\n            exports: {}\n        }).exports, mod), mod.exports;\n    }\n;\nvar __reExport = (target, module2, copyDefault, desc)=>{\n    if (module2 && typeof module2 === \"object\" || typeof module2 === \"function\") {\n        for (let key of __getOwnPropNames(module2))if (!__hasOwnProp.call(target, key) && (copyDefault || key !== \"default\")) __defProp(target, key, {\n            get: ()=>module2[key]\n            ,\n            enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable\n        });\n    }\n    return target;\n};\nvar __toESM = (module2, isNodeMode)=>{\n    return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, \"default\", !isNodeMode && module2 && module2.__esModule ? {\n        get: ()=>module2.default\n        ,\n        enumerable: true\n    } : {\n        value: module2,\n        enumerable: true\n    })), module2);\n};\n// node_modules/js-sha256/src/sha256.js\nvar require_sha256 = __commonJS({\n    \"node_modules/js-sha256/src/sha256.js\" (exports1, module) {\n        (function() {\n            \n            var ERROR = \"input is invalid type\";\n            var WINDOW = typeof window === \"object\";\n            var root = WINDOW ? window : {};\n            if (root.JS_SHA256_NO_WINDOW) {\n                WINDOW = false;\n            }\n            var WEB_WORKER = !WINDOW && typeof self === \"object\";\n            var NODE_JS = !root.JS_SHA256_NO_NODE_JS && typeof process === \"object\" && process.versions && process.versions.node;\n            if (NODE_JS) {\n                root = global;\n            } else if (WEB_WORKER) {\n                root = self;\n            }\n            var COMMON_JS = !root.JS_SHA256_NO_COMMON_JS && typeof module === \"object\" && module.exports;\n            var AMD = typeof define === \"function\" && define.amd;\n            var ARRAY_BUFFER = !root.JS_SHA256_NO_ARRAY_BUFFER && typeof ArrayBuffer !== \"undefined\";\n            var HEX_CHARS = \"0123456789abcdef\".split(\"\");\n            var EXTRA = [\n                -2147483648,\n                8388608,\n                32768,\n                128\n            ];\n            var SHIFT = [\n                24,\n                16,\n                8,\n                0\n            ];\n            var K = [\n                1116352408,\n                1899447441,\n                3049323471,\n                3921009573,\n                961987163,\n                1508970993,\n                2453635748,\n                2870763221,\n                3624381080,\n                310598401,\n                607225278,\n                1426881987,\n                1925078388,\n                2162078206,\n                2614888103,\n                3248222580,\n                3835390401,\n                4022224774,\n                264347078,\n                604807628,\n                770255983,\n                1249150122,\n                1555081692,\n                1996064986,\n                2554220882,\n                2821834349,\n                2952996808,\n                3210313671,\n                3336571891,\n                3584528711,\n                113926993,\n                338241895,\n                666307205,\n                773529912,\n                1294757372,\n                1396182291,\n                1695183700,\n                1986661051,\n                2177026350,\n                2456956037,\n                2730485921,\n                2820302411,\n                3259730800,\n                3345764771,\n                3516065817,\n                3600352804,\n                4094571909,\n                275423344,\n                430227734,\n                506948616,\n                659060556,\n                883997877,\n                958139571,\n                1322822218,\n                1537002063,\n                1747873779,\n                1955562222,\n                2024104815,\n                2227730452,\n                2361852424,\n                2428436474,\n                2756734187,\n                3204031479,\n                3329325298\n            ];\n            var OUTPUT_TYPES = [\n                \"hex\",\n                \"array\",\n                \"digest\",\n                \"arrayBuffer\"\n            ];\n            var blocks = [];\n            if (root.JS_SHA256_NO_NODE_JS || !Array.isArray) {\n                Array.isArray = function(obj) {\n                    return Object.prototype.toString.call(obj) === \"[object Array]\";\n                };\n            }\n            if (ARRAY_BUFFER && (root.JS_SHA256_NO_ARRAY_BUFFER_IS_VIEW || !ArrayBuffer.isView)) {\n                ArrayBuffer.isView = function(obj) {\n                    return typeof obj === \"object\" && obj.buffer && obj.buffer.constructor === ArrayBuffer;\n                };\n            }\n            var createOutputMethod = function(outputType, is2242) {\n                return function(message) {\n                    return new Sha256(is2242, true).update(message)[outputType]();\n                };\n            };\n            var createMethod = function(is2242) {\n                var method2 = createOutputMethod(\"hex\", is2242);\n                if (NODE_JS) {\n                    method2 = nodeWrap(method2, is2242);\n                }\n                method2.create = function() {\n                    return new Sha256(is2242);\n                };\n                method2.update = function(message) {\n                    return method2.create().update(message);\n                };\n                for(var i2 = 0; i2 < OUTPUT_TYPES.length; ++i2){\n                    var type = OUTPUT_TYPES[i2];\n                    method2[type] = createOutputMethod(type, is2242);\n                }\n                return method2;\n            };\n            var nodeWrap = function(method, is224) {\n                var crypto = eval(\"require('crypto')\");\n                var Buffer = eval(\"require('buffer').Buffer\");\n                var algorithm = is224 ? \"sha224\" : \"sha256\";\n                var nodeMethod = function(message) {\n                    if (typeof message === \"string\") {\n                        return crypto.createHash(algorithm).update(message, \"utf8\").digest(\"hex\");\n                    } else {\n                        if (message === null || message === void 0) {\n                            throw new Error(ERROR);\n                        } else if (message.constructor === ArrayBuffer) {\n                            message = new Uint8Array(message);\n                        }\n                    }\n                    if (Array.isArray(message) || ArrayBuffer.isView(message) || message.constructor === Buffer) {\n                        return crypto.createHash(algorithm).update(new Buffer(message)).digest(\"hex\");\n                    } else {\n                        return method(message);\n                    }\n                };\n                return nodeMethod;\n            };\n            var createHmacOutputMethod = function(outputType, is2242) {\n                return function(key, message) {\n                    return new HmacSha256(key, is2242, true).update(message)[outputType]();\n                };\n            };\n            var createHmacMethod = function(is2242) {\n                var method2 = createHmacOutputMethod(\"hex\", is2242);\n                method2.create = function(key) {\n                    return new HmacSha256(key, is2242);\n                };\n                method2.update = function(key, message) {\n                    return method2.create(key).update(message);\n                };\n                for(var i3 = 0; i3 < OUTPUT_TYPES.length; ++i3){\n                    var type = OUTPUT_TYPES[i3];\n                    method2[type] = createHmacOutputMethod(type, is2242);\n                }\n                return method2;\n            };\n            function Sha256(is2242, sharedMemory) {\n                if (sharedMemory) {\n                    blocks[0] = blocks[16] = blocks[1] = blocks[2] = blocks[3] = blocks[4] = blocks[5] = blocks[6] = blocks[7] = blocks[8] = blocks[9] = blocks[10] = blocks[11] = blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;\n                    this.blocks = blocks;\n                } else {\n                    this.blocks = [\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0\n                    ];\n                }\n                if (is2242) {\n                    this.h0 = 3238371032;\n                    this.h1 = 914150663;\n                    this.h2 = 812702999;\n                    this.h3 = 4144912697;\n                    this.h4 = 4290775857;\n                    this.h5 = 1750603025;\n                    this.h6 = 1694076839;\n                    this.h7 = 3204075428;\n                } else {\n                    this.h0 = 1779033703;\n                    this.h1 = 3144134277;\n                    this.h2 = 1013904242;\n                    this.h3 = 2773480762;\n                    this.h4 = 1359893119;\n                    this.h5 = 2600822924;\n                    this.h6 = 528734635;\n                    this.h7 = 1541459225;\n                }\n                this.block = this.start = this.bytes = this.hBytes = 0;\n                this.finalized = this.hashed = false;\n                this.first = true;\n                this.is224 = is2242;\n            }\n            Sha256.prototype.update = function(message) {\n                if (this.finalized) {\n                    return;\n                }\n                var notString, type = typeof message;\n                if (type !== \"string\") {\n                    if (type === \"object\") {\n                        if (message === null) {\n                            throw new Error(ERROR);\n                        } else if (ARRAY_BUFFER && message.constructor === ArrayBuffer) {\n                            message = new Uint8Array(message);\n                        } else if (!Array.isArray(message)) {\n                            if (!ARRAY_BUFFER || !ArrayBuffer.isView(message)) {\n                                throw new Error(ERROR);\n                            }\n                        }\n                    } else {\n                        throw new Error(ERROR);\n                    }\n                    notString = true;\n                }\n                var code, index = 0, i4, length = message.length, blocks2 = this.blocks;\n                while(index < length){\n                    if (this.hashed) {\n                        this.hashed = false;\n                        blocks2[0] = this.block;\n                        blocks2[16] = blocks2[1] = blocks2[2] = blocks2[3] = blocks2[4] = blocks2[5] = blocks2[6] = blocks2[7] = blocks2[8] = blocks2[9] = blocks2[10] = blocks2[11] = blocks2[12] = blocks2[13] = blocks2[14] = blocks2[15] = 0;\n                    }\n                    if (notString) {\n                        for(i4 = this.start; index < length && i4 < 64; ++index){\n                            blocks2[i4 >> 2] |= message[index] << SHIFT[(i4++) & 3];\n                        }\n                    } else {\n                        for(i4 = this.start; index < length && i4 < 64; ++index){\n                            code = message.charCodeAt(index);\n                            if (code < 128) {\n                                blocks2[i4 >> 2] |= code << SHIFT[(i4++) & 3];\n                            } else if (code < 2048) {\n                                blocks2[i4 >> 2] |= (192 | code >> 6) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code & 63) << SHIFT[(i4++) & 3];\n                            } else if (code < 55296 || code >= 57344) {\n                                blocks2[i4 >> 2] |= (224 | code >> 12) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code >> 6 & 63) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code & 63) << SHIFT[(i4++) & 3];\n                            } else {\n                                code = 65536 + ((code & 1023) << 10 | message.charCodeAt(++index) & 1023);\n                                blocks2[i4 >> 2] |= (240 | code >> 18) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code >> 12 & 63) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code >> 6 & 63) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code & 63) << SHIFT[(i4++) & 3];\n                            }\n                        }\n                    }\n                    this.lastByteIndex = i4;\n                    this.bytes += i4 - this.start;\n                    if (i4 >= 64) {\n                        this.block = blocks2[16];\n                        this.start = i4 - 64;\n                        this.hash();\n                        this.hashed = true;\n                    } else {\n                        this.start = i4;\n                    }\n                }\n                if (this.bytes > 4294967295) {\n                    this.hBytes += this.bytes / 4294967296 << 0;\n                    this.bytes = this.bytes % 4294967296;\n                }\n                return this;\n            };\n            Sha256.prototype.finalize = function() {\n                if (this.finalized) {\n                    return;\n                }\n                this.finalized = true;\n                var blocks2 = this.blocks, i5 = this.lastByteIndex;\n                blocks2[16] = this.block;\n                blocks2[i5 >> 2] |= EXTRA[i5 & 3];\n                this.block = blocks2[16];\n                if (i5 >= 56) {\n                    if (!this.hashed) {\n                        this.hash();\n                    }\n                    blocks2[0] = this.block;\n                    blocks2[16] = blocks2[1] = blocks2[2] = blocks2[3] = blocks2[4] = blocks2[5] = blocks2[6] = blocks2[7] = blocks2[8] = blocks2[9] = blocks2[10] = blocks2[11] = blocks2[12] = blocks2[13] = blocks2[14] = blocks2[15] = 0;\n                }\n                blocks2[14] = this.hBytes << 3 | this.bytes >>> 29;\n                blocks2[15] = this.bytes << 3;\n                this.hash();\n            };\n            Sha256.prototype.hash = function() {\n                var a = this.h0, b = this.h1, c = this.h2, d = this.h3, e = this.h4, f = this.h5, g = this.h6, h = this.h7, blocks2 = this.blocks, j, s0, s1, maj, t1, t2, ch, ab, da, cd, bc;\n                for(j = 16; j < 64; ++j){\n                    t1 = blocks2[j - 15];\n                    s0 = (t1 >>> 7 | t1 << 25) ^ (t1 >>> 18 | t1 << 14) ^ t1 >>> 3;\n                    t1 = blocks2[j - 2];\n                    s1 = (t1 >>> 17 | t1 << 15) ^ (t1 >>> 19 | t1 << 13) ^ t1 >>> 10;\n                    blocks2[j] = blocks2[j - 16] + s0 + blocks2[j - 7] + s1 << 0;\n                }\n                bc = b & c;\n                for(j = 0; j < 64; j += 4){\n                    if (this.first) {\n                        if (this.is224) {\n                            ab = 300032;\n                            t1 = blocks2[0] - 1413257819;\n                            h = t1 - 150054599 << 0;\n                            d = t1 + 24177077 << 0;\n                        } else {\n                            ab = 704751109;\n                            t1 = blocks2[0] - 210244248;\n                            h = t1 - 1521486534 << 0;\n                            d = t1 + 143694565 << 0;\n                        }\n                        this.first = false;\n                    } else {\n                        s0 = (a >>> 2 | a << 30) ^ (a >>> 13 | a << 19) ^ (a >>> 22 | a << 10);\n                        s1 = (e >>> 6 | e << 26) ^ (e >>> 11 | e << 21) ^ (e >>> 25 | e << 7);\n                        ab = a & b;\n                        maj = ab ^ a & c ^ bc;\n                        ch = e & f ^ ~e & g;\n                        t1 = h + s1 + ch + K[j] + blocks2[j];\n                        t2 = s0 + maj;\n                        h = d + t1 << 0;\n                        d = t1 + t2 << 0;\n                    }\n                    s0 = (d >>> 2 | d << 30) ^ (d >>> 13 | d << 19) ^ (d >>> 22 | d << 10);\n                    s1 = (h >>> 6 | h << 26) ^ (h >>> 11 | h << 21) ^ (h >>> 25 | h << 7);\n                    da = d & a;\n                    maj = da ^ d & b ^ ab;\n                    ch = h & e ^ ~h & f;\n                    t1 = g + s1 + ch + K[j + 1] + blocks2[j + 1];\n                    t2 = s0 + maj;\n                    g = c + t1 << 0;\n                    c = t1 + t2 << 0;\n                    s0 = (c >>> 2 | c << 30) ^ (c >>> 13 | c << 19) ^ (c >>> 22 | c << 10);\n                    s1 = (g >>> 6 | g << 26) ^ (g >>> 11 | g << 21) ^ (g >>> 25 | g << 7);\n                    cd = c & d;\n                    maj = cd ^ c & a ^ da;\n                    ch = g & h ^ ~g & e;\n                    t1 = f + s1 + ch + K[j + 2] + blocks2[j + 2];\n                    t2 = s0 + maj;\n                    f = b + t1 << 0;\n                    b = t1 + t2 << 0;\n                    s0 = (b >>> 2 | b << 30) ^ (b >>> 13 | b << 19) ^ (b >>> 22 | b << 10);\n                    s1 = (f >>> 6 | f << 26) ^ (f >>> 11 | f << 21) ^ (f >>> 25 | f << 7);\n                    bc = b & c;\n                    maj = bc ^ b & d ^ cd;\n                    ch = f & g ^ ~f & h;\n                    t1 = e + s1 + ch + K[j + 3] + blocks2[j + 3];\n                    t2 = s0 + maj;\n                    e = a + t1 << 0;\n                    a = t1 + t2 << 0;\n                }\n                this.h0 = this.h0 + a << 0;\n                this.h1 = this.h1 + b << 0;\n                this.h2 = this.h2 + c << 0;\n                this.h3 = this.h3 + d << 0;\n                this.h4 = this.h4 + e << 0;\n                this.h5 = this.h5 + f << 0;\n                this.h6 = this.h6 + g << 0;\n                this.h7 = this.h7 + h << 0;\n            };\n            Sha256.prototype.hex = function() {\n                this.finalize();\n                var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5, h6 = this.h6, h7 = this.h7;\n                var hex = HEX_CHARS[h0 >> 28 & 15] + HEX_CHARS[h0 >> 24 & 15] + HEX_CHARS[h0 >> 20 & 15] + HEX_CHARS[h0 >> 16 & 15] + HEX_CHARS[h0 >> 12 & 15] + HEX_CHARS[h0 >> 8 & 15] + HEX_CHARS[h0 >> 4 & 15] + HEX_CHARS[h0 & 15] + HEX_CHARS[h1 >> 28 & 15] + HEX_CHARS[h1 >> 24 & 15] + HEX_CHARS[h1 >> 20 & 15] + HEX_CHARS[h1 >> 16 & 15] + HEX_CHARS[h1 >> 12 & 15] + HEX_CHARS[h1 >> 8 & 15] + HEX_CHARS[h1 >> 4 & 15] + HEX_CHARS[h1 & 15] + HEX_CHARS[h2 >> 28 & 15] + HEX_CHARS[h2 >> 24 & 15] + HEX_CHARS[h2 >> 20 & 15] + HEX_CHARS[h2 >> 16 & 15] + HEX_CHARS[h2 >> 12 & 15] + HEX_CHARS[h2 >> 8 & 15] + HEX_CHARS[h2 >> 4 & 15] + HEX_CHARS[h2 & 15] + HEX_CHARS[h3 >> 28 & 15] + HEX_CHARS[h3 >> 24 & 15] + HEX_CHARS[h3 >> 20 & 15] + HEX_CHARS[h3 >> 16 & 15] + HEX_CHARS[h3 >> 12 & 15] + HEX_CHARS[h3 >> 8 & 15] + HEX_CHARS[h3 >> 4 & 15] + HEX_CHARS[h3 & 15] + HEX_CHARS[h4 >> 28 & 15] + HEX_CHARS[h4 >> 24 & 15] + HEX_CHARS[h4 >> 20 & 15] + HEX_CHARS[h4 >> 16 & 15] + HEX_CHARS[h4 >> 12 & 15] + HEX_CHARS[h4 >> 8 & 15] + HEX_CHARS[h4 >> 4 & 15] + HEX_CHARS[h4 & 15] + HEX_CHARS[h5 >> 28 & 15] + HEX_CHARS[h5 >> 24 & 15] + HEX_CHARS[h5 >> 20 & 15] + HEX_CHARS[h5 >> 16 & 15] + HEX_CHARS[h5 >> 12 & 15] + HEX_CHARS[h5 >> 8 & 15] + HEX_CHARS[h5 >> 4 & 15] + HEX_CHARS[h5 & 15] + HEX_CHARS[h6 >> 28 & 15] + HEX_CHARS[h6 >> 24 & 15] + HEX_CHARS[h6 >> 20 & 15] + HEX_CHARS[h6 >> 16 & 15] + HEX_CHARS[h6 >> 12 & 15] + HEX_CHARS[h6 >> 8 & 15] + HEX_CHARS[h6 >> 4 & 15] + HEX_CHARS[h6 & 15];\n                if (!this.is224) {\n                    hex += HEX_CHARS[h7 >> 28 & 15] + HEX_CHARS[h7 >> 24 & 15] + HEX_CHARS[h7 >> 20 & 15] + HEX_CHARS[h7 >> 16 & 15] + HEX_CHARS[h7 >> 12 & 15] + HEX_CHARS[h7 >> 8 & 15] + HEX_CHARS[h7 >> 4 & 15] + HEX_CHARS[h7 & 15];\n                }\n                return hex;\n            };\n            Sha256.prototype.toString = Sha256.prototype.hex;\n            Sha256.prototype.digest = function() {\n                this.finalize();\n                var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5, h6 = this.h6, h7 = this.h7;\n                var arr = [\n                    h0 >> 24 & 255,\n                    h0 >> 16 & 255,\n                    h0 >> 8 & 255,\n                    h0 & 255,\n                    h1 >> 24 & 255,\n                    h1 >> 16 & 255,\n                    h1 >> 8 & 255,\n                    h1 & 255,\n                    h2 >> 24 & 255,\n                    h2 >> 16 & 255,\n                    h2 >> 8 & 255,\n                    h2 & 255,\n                    h3 >> 24 & 255,\n                    h3 >> 16 & 255,\n                    h3 >> 8 & 255,\n                    h3 & 255,\n                    h4 >> 24 & 255,\n                    h4 >> 16 & 255,\n                    h4 >> 8 & 255,\n                    h4 & 255,\n                    h5 >> 24 & 255,\n                    h5 >> 16 & 255,\n                    h5 >> 8 & 255,\n                    h5 & 255,\n                    h6 >> 24 & 255,\n                    h6 >> 16 & 255,\n                    h6 >> 8 & 255,\n                    h6 & 255\n                ];\n                if (!this.is224) {\n                    arr.push(h7 >> 24 & 255, h7 >> 16 & 255, h7 >> 8 & 255, h7 & 255);\n                }\n                return arr;\n            };\n            Sha256.prototype.array = Sha256.prototype.digest;\n            Sha256.prototype.arrayBuffer = function() {\n                this.finalize();\n                var buffer = new ArrayBuffer(this.is224 ? 28 : 32);\n                var dataView = new DataView(buffer);\n                dataView.setUint32(0, this.h0);\n                dataView.setUint32(4, this.h1);\n                dataView.setUint32(8, this.h2);\n                dataView.setUint32(12, this.h3);\n                dataView.setUint32(16, this.h4);\n                dataView.setUint32(20, this.h5);\n                dataView.setUint32(24, this.h6);\n                if (!this.is224) {\n                    dataView.setUint32(28, this.h7);\n                }\n                return buffer;\n            };\n            function HmacSha256(key, is2242, sharedMemory) {\n                var i6, type = typeof key;\n                if (type === \"string\") {\n                    var bytes = [], length = key.length, index = 0, code;\n                    for(i6 = 0; i6 < length; ++i6){\n                        code = key.charCodeAt(i6);\n                        if (code < 128) {\n                            bytes[index++] = code;\n                        } else if (code < 2048) {\n                            bytes[index++] = 192 | code >> 6;\n                            bytes[index++] = 128 | code & 63;\n                        } else if (code < 55296 || code >= 57344) {\n                            bytes[index++] = 224 | code >> 12;\n                            bytes[index++] = 128 | code >> 6 & 63;\n                            bytes[index++] = 128 | code & 63;\n                        } else {\n                            code = 65536 + ((code & 1023) << 10 | key.charCodeAt(++i6) & 1023);\n                            bytes[index++] = 240 | code >> 18;\n                            bytes[index++] = 128 | code >> 12 & 63;\n                            bytes[index++] = 128 | code >> 6 & 63;\n                            bytes[index++] = 128 | code & 63;\n                        }\n                    }\n                    key = bytes;\n                } else {\n                    if (type === \"object\") {\n                        if (key === null) {\n                            throw new Error(ERROR);\n                        } else if (ARRAY_BUFFER && key.constructor === ArrayBuffer) {\n                            key = new Uint8Array(key);\n                        } else if (!Array.isArray(key)) {\n                            if (!ARRAY_BUFFER || !ArrayBuffer.isView(key)) {\n                                throw new Error(ERROR);\n                            }\n                        }\n                    } else {\n                        throw new Error(ERROR);\n                    }\n                }\n                if (key.length > 64) {\n                    key = new Sha256(is2242, true).update(key).array();\n                }\n                var oKeyPad = [], iKeyPad = [];\n                for(i6 = 0; i6 < 64; ++i6){\n                    var b = key[i6] || 0;\n                    oKeyPad[i6] = 92 ^ b;\n                    iKeyPad[i6] = 54 ^ b;\n                }\n                Sha256.call(this, is2242, sharedMemory);\n                this.update(iKeyPad);\n                this.oKeyPad = oKeyPad;\n                this.inner = true;\n                this.sharedMemory = sharedMemory;\n            }\n            HmacSha256.prototype = new Sha256();\n            HmacSha256.prototype.finalize = function() {\n                Sha256.prototype.finalize.call(this);\n                if (this.inner) {\n                    this.inner = false;\n                    var innerHash = this.array();\n                    Sha256.call(this, this.is224, this.sharedMemory);\n                    this.update(this.oKeyPad);\n                    this.update(innerHash);\n                    Sha256.prototype.finalize.call(this);\n                }\n            };\n            var exports = createMethod();\n            exports.sha256 = exports;\n            exports.sha224 = createMethod(true);\n            exports.sha256.hmac = createHmacMethod();\n            exports.sha224.hmac = createHmacMethod(true);\n            if (COMMON_JS) {\n                module.exports = exports;\n            } else {\n                root.sha256 = exports.sha256;\n                root.sha224 = exports.sha224;\n                if (AMD) {\n                    define(function() {\n                        return exports;\n                    });\n                }\n            }\n        })();\n    }\n});\n// node_modules/@dfinity/principal/lib/esm/utils/base32.js\nvar alphabet = \"abcdefghijklmnopqrstuvwxyz234567\";\nvar lookupTable = /* @__PURE__ */ Object.create(null);\nfor(let i = 0; i < alphabet.length; i++){\n    lookupTable[alphabet[i]] = i;\n}\nlookupTable[\"0\"] = lookupTable.o;\nlookupTable[\"1\"] = lookupTable.i;\nfunction encode(input) {\n    let skip = 0;\n    let bits = 0;\n    let output = \"\";\n    function encodeByte(byte) {\n        if (skip < 0) {\n            bits |= byte >> -skip;\n        } else {\n            bits = byte << skip & 248;\n        }\n        if (skip > 3) {\n            skip -= 8;\n            return 1;\n        }\n        if (skip < 4) {\n            output += alphabet[bits >> 3];\n            skip += 5;\n        }\n        return 0;\n    }\n    for(let i7 = 0; i7 < input.length;){\n        i7 += encodeByte(input[i7]);\n    }\n    return output + (skip < 0 ? alphabet[bits >> 3] : \"\");\n}\nfunction decode(input) {\n    let skip = 0;\n    let byte = 0;\n    const output = new Uint8Array(input.length * 4 / 3 | 0);\n    let o = 0;\n    function decodeChar(char) {\n        let val = lookupTable[char.toLowerCase()];\n        if (val === void 0) {\n            throw new Error(`Invalid character: ${JSON.stringify(char)}`);\n        }\n        val <<= 3;\n        byte |= val >>> skip;\n        skip += 5;\n        if (skip >= 8) {\n            output[o++] = byte;\n            skip -= 8;\n            if (skip > 0) {\n                byte = val << 5 - skip & 255;\n            } else {\n                byte = 0;\n            }\n        }\n    }\n    for (const c of input){\n        decodeChar(c);\n    }\n    return output.slice(0, o);\n}\n// node_modules/@dfinity/principal/lib/esm/utils/getCrc.js\nvar lookUpTable = new Uint32Array([\n    0,\n    1996959894,\n    3993919788,\n    2567524794,\n    124634137,\n    1886057615,\n    3915621685,\n    2657392035,\n    249268274,\n    2044508324,\n    3772115230,\n    2547177864,\n    162941995,\n    2125561021,\n    3887607047,\n    2428444049,\n    498536548,\n    1789927666,\n    4089016648,\n    2227061214,\n    450548861,\n    1843258603,\n    4107580753,\n    2211677639,\n    325883990,\n    1684777152,\n    4251122042,\n    2321926636,\n    335633487,\n    1661365465,\n    4195302755,\n    2366115317,\n    997073096,\n    1281953886,\n    3579855332,\n    2724688242,\n    1006888145,\n    1258607687,\n    3524101629,\n    2768942443,\n    901097722,\n    1119000684,\n    3686517206,\n    2898065728,\n    853044451,\n    1172266101,\n    3705015759,\n    2882616665,\n    651767980,\n    1373503546,\n    3369554304,\n    3218104598,\n    565507253,\n    1454621731,\n    3485111705,\n    3099436303,\n    671266974,\n    1594198024,\n    3322730930,\n    2970347812,\n    795835527,\n    1483230225,\n    3244367275,\n    3060149565,\n    1994146192,\n    31158534,\n    2563907772,\n    4023717930,\n    1907459465,\n    112637215,\n    2680153253,\n    3904427059,\n    2013776290,\n    251722036,\n    2517215374,\n    3775830040,\n    2137656763,\n    141376813,\n    2439277719,\n    3865271297,\n    1802195444,\n    476864866,\n    2238001368,\n    4066508878,\n    1812370925,\n    453092731,\n    2181625025,\n    4111451223,\n    1706088902,\n    314042704,\n    2344532202,\n    4240017532,\n    1658658271,\n    366619977,\n    2362670323,\n    4224994405,\n    1303535960,\n    984961486,\n    2747007092,\n    3569037538,\n    1256170817,\n    1037604311,\n    2765210733,\n    3554079995,\n    1131014506,\n    879679996,\n    2909243462,\n    3663771856,\n    1141124467,\n    855842277,\n    2852801631,\n    3708648649,\n    1342533948,\n    654459306,\n    3188396048,\n    3373015174,\n    1466479909,\n    544179635,\n    3110523913,\n    3462522015,\n    1591671054,\n    702138776,\n    2966460450,\n    3352799412,\n    1504918807,\n    783551873,\n    3082640443,\n    3233442989,\n    3988292384,\n    2596254646,\n    62317068,\n    1957810842,\n    3939845945,\n    2647816111,\n    81470997,\n    1943803523,\n    3814918930,\n    2489596804,\n    225274430,\n    2053790376,\n    3826175755,\n    2466906013,\n    167816743,\n    2097651377,\n    4027552580,\n    2265490386,\n    503444072,\n    1762050814,\n    4150417245,\n    2154129355,\n    426522225,\n    1852507879,\n    4275313526,\n    2312317920,\n    282753626,\n    1742555852,\n    4189708143,\n    2394877945,\n    397917763,\n    1622183637,\n    3604390888,\n    2714866558,\n    953729732,\n    1340076626,\n    3518719985,\n    2797360999,\n    1068828381,\n    1219638859,\n    3624741850,\n    2936675148,\n    906185462,\n    1090812512,\n    3747672003,\n    2825379669,\n    829329135,\n    1181335161,\n    3412177804,\n    3160834842,\n    628085408,\n    1382605366,\n    3423369109,\n    3138078467,\n    570562233,\n    1426400815,\n    3317316542,\n    2998733608,\n    733239954,\n    1555261956,\n    3268935591,\n    3050360625,\n    752459403,\n    1541320221,\n    2607071920,\n    3965973030,\n    1969922972,\n    40735498,\n    2617837225,\n    3943577151,\n    1913087877,\n    83908371,\n    2512341634,\n    3803740692,\n    2075208622,\n    213261112,\n    2463272603,\n    3855990285,\n    2094854071,\n    198958881,\n    2262029012,\n    4057260610,\n    1759359992,\n    534414190,\n    2176718541,\n    4139329115,\n    1873836001,\n    414664567,\n    2282248934,\n    4279200368,\n    1711684554,\n    285281116,\n    2405801727,\n    4167216745,\n    1634467795,\n    376229701,\n    2685067896,\n    3608007406,\n    1308918612,\n    956543938,\n    2808555105,\n    3495958263,\n    1231636301,\n    1047427035,\n    2932959818,\n    3654703836,\n    1088359270,\n    936918000,\n    2847714899,\n    3736837829,\n    1202900863,\n    817233897,\n    3183342108,\n    3401237130,\n    1404277552,\n    615818150,\n    3134207493,\n    3453421203,\n    1423857449,\n    601450431,\n    3009837614,\n    3294710456,\n    1567103746,\n    711928724,\n    3020668471,\n    3272380065,\n    1510334235,\n    755167117\n]);\nfunction getCrc32(buf) {\n    const b = new Uint8Array(buf);\n    let crc = -1;\n    for(let i8 = 0; i8 < b.length; i8++){\n        const byte = b[i8];\n        const t = (byte ^ crc) & 255;\n        crc = lookUpTable[t] ^ crc >>> 8;\n    }\n    return (crc ^ -1) >>> 0;\n}\n// node_modules/@dfinity/principal/lib/esm/utils/sha224.js\nvar import_js_sha256 = __toESM(require_sha256());\nfunction sha224(data) {\n    const shaObj = import_js_sha256.sha224.create();\n    shaObj.update(data);\n    return new Uint8Array(shaObj.array());\n}\n// node_modules/@dfinity/principal/lib/esm/index.js\nvar SELF_AUTHENTICATING_SUFFIX = 2;\nvar ANONYMOUS_SUFFIX = 4;\nvar fromHexString = (hexString)=>{\n    var _a;\n    return new Uint8Array(((_a = hexString.match(/.{1,2}/g)) !== null && _a !== void 0 ? _a : []).map((byte)=>parseInt(byte, 16)\n    ));\n};\nvar toHexString = (bytes)=>bytes.reduce((str, byte)=>str + byte.toString(16).padStart(2, \"0\")\n    , \"\")\n;\nvar Principal = class {\n    static anonymous() {\n        return new this(new Uint8Array([\n            ANONYMOUS_SUFFIX\n        ]));\n    }\n    static selfAuthenticating(publicKey) {\n        const sha = sha224(publicKey);\n        return new this(new Uint8Array([\n            ...sha,\n            SELF_AUTHENTICATING_SUFFIX\n        ]));\n    }\n    static from(other) {\n        if (typeof other === \"string\") {\n            return Principal.fromText(other);\n        } else if (typeof other === \"object\" && other !== null && other._isPrincipal === true) {\n            return new Principal(other._arr);\n        }\n        throw new Error(`Impossible to convert ${JSON.stringify(other)} to Principal.`);\n    }\n    static fromHex(hex) {\n        return new this(fromHexString(hex));\n    }\n    static fromText(text2) {\n        const canisterIdNoDash = text2.toLowerCase().replace(/-/g, \"\");\n        let arr = decode(canisterIdNoDash);\n        arr = arr.slice(4, arr.length);\n        const principal = new this(arr);\n        if (principal.toText() !== text2) {\n            throw new Error(`Principal \"${principal.toText()}\" does not have a valid checksum (original value \"${text2}\" may not be a valid Principal ID).`);\n        }\n        return principal;\n    }\n    static fromUint8Array(arr) {\n        return new this(arr);\n    }\n    isAnonymous() {\n        return this._arr.byteLength === 1 && this._arr[0] === ANONYMOUS_SUFFIX;\n    }\n    toUint8Array() {\n        return this._arr;\n    }\n    toHex() {\n        return toHexString(this._arr).toUpperCase();\n    }\n    toText() {\n        const checksumArrayBuf = new ArrayBuffer(4);\n        const view = new DataView(checksumArrayBuf);\n        view.setUint32(0, getCrc32(this._arr));\n        const checksum = new Uint8Array(checksumArrayBuf);\n        const bytes = Uint8Array.from(this._arr);\n        const array = new Uint8Array([\n            ...checksum,\n            ...bytes\n        ]);\n        const result = encode(array);\n        const matches = result.match(/.{1,5}/g);\n        if (!matches) {\n            throw new Error();\n        }\n        return matches.join(\"-\");\n    }\n    toString() {\n        return this.toText();\n    }\n    constructor(_arr){\n        this._arr = _arr;\n        this._isPrincipal = true;\n    }\n};\nexports.Principal = Principal;\nvar _ic;\n// node_modules/azle/src/lib/ic.ts\nvar ic = (_ic = globalThis.ic) !== null && _ic !== void 0 ? _ic : {};\n// node_modules/azle/src/lib/candid_types/variant.ts\nfunction match(variant, matcher) {\n    for(const key in variant){\n        if (key in matcher) {\n            return matcher[key](variant[key]);\n        }\n    }\n    return matcher._();\n}\n// node_modules/azle/src/lib/candid_types/index.ts\nvar Opt = {\n    Some: (value)=>({\n            Some: value\n        })\n    ,\n    None: Object.freeze({\n        None: null\n    })\n};\n// node_modules/azle/src/lib/results.ts\nvar Result = {\n    Ok: (value)=>({\n            Ok: value\n        })\n    ,\n    Err: (value)=>({\n            Err: value\n        })\n};\n// node_modules/azle/src/lib/stable_b_tree_map.ts\nvar StableBTreeMap = class {\n    containsKey(key) {\n        if (arguments.length === 0) {\n            throw new Error(\"An argument for 'key' was not provided\");\n        }\n        return ic.stableBTreeMapContainsKey(this.memoryId, key);\n    }\n    get(key) {\n        if (arguments.length === 0) {\n            throw new Error(\"An argument for 'key' was not provided\");\n        }\n        return ic.stableBTreeMapGet(this.memoryId, key);\n    }\n    insert(key, value) {\n        if (arguments.length === 0) {\n            throw new Error(\"An argument for 'key' was not provided\");\n        }\n        if (arguments.length === 1) {\n            throw new Error(\"An argument for 'value' was not provided\");\n        }\n        return ic.stableBTreeMapInsert(this.memoryId, key, value);\n    }\n    isEmpty() {\n        return ic.stableBTreeMapIsEmpty(this.memoryId);\n    }\n    items() {\n        return ic.stableBTreeMapItems(this.memoryId);\n    }\n    keys() {\n        return ic.stableBTreeMapKeys(this.memoryId);\n    }\n    len() {\n        return ic.stableBTreeMapLen(this.memoryId);\n    }\n    remove(key) {\n        if (arguments.length === 0) {\n            throw new Error(\"An argument for 'key' was not provided\");\n        }\n        return ic.stableBTreeMapRemove(this.memoryId, key);\n    }\n    values() {\n        return ic.stableBTreeMapValues(this.memoryId);\n    }\n    constructor(memoryId, maxKeySize, maxValueSize){\n        this.memoryId = memoryId;\n    }\n};\n// node_modules/uuid/dist/esm-browser/rng.js\nvar getRandomValues;\nvar rnds8 = new Uint8Array(16);\nfunction rng() {\n    if (!getRandomValues) {\n        getRandomValues = typeof crypto !== \"undefined\" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);\n        if (!getRandomValues) {\n            throw new Error(\"crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported\");\n        }\n    }\n    return getRandomValues(rnds8);\n}\n// node_modules/uuid/dist/esm-browser/stringify.js\nvar byteToHex = [];\nfor(let i1 = 0; i1 < 256; ++i1){\n    byteToHex.push((i1 + 256).toString(16).slice(1));\n}\nfunction unsafeStringify(arr, offset = 0) {\n    return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + \"-\" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + \"-\" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + \"-\" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + \"-\" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];\n}\n// node_modules/uuid/dist/esm-browser/native.js\nvar randomUUID = typeof crypto !== \"undefined\" && crypto.randomUUID && crypto.randomUUID.bind(crypto);\nvar native_default = {\n    randomUUID\n};\n// node_modules/uuid/dist/esm-browser/v4.js\nfunction v4(options, buf, offset) {\n    if (native_default.randomUUID && !buf && !options) {\n        return native_default.randomUUID();\n    }\n    options = options || {};\n    const rnds = options.random || (options.rng || rng)();\n    rnds[6] = rnds[6] & 15 | 64;\n    rnds[8] = rnds[8] & 63 | 128;\n    if (buf) {\n        offset = offset || 0;\n        for(let i9 = 0; i9 < 16; ++i9){\n            buf[offset + i9] = rnds[i9];\n        }\n        return buf;\n    }\n    return unsafeStringify(rnds);\n}\nvar v4_default = v4;\n// src/index.ts\nvar hospitalStorage = new StableBTreeMap(0, 44, 512);\nvar patientStorage = new StableBTreeMap(1, 44, 512);\nvar donorStorage = new StableBTreeMap(2, 44, 512);\nvar pledgeStorage = new StableBTreeMap(3, 44, 512);\nfunction initBloodDrive() {\n    if (!hospitalStorage.isEmpty() || !patientStorage.isEmpty() || !donorStorage.isEmpty() || !pledgeStorage.isEmpty()) {\n        return `Blood donation drive has already been initialized`;\n    }\n    const hospital = {\n        id: v4_default(),\n        name: \"Central Hospital\",\n        location: \"City Center\",\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    hospitalStorage.insert(hospital.id, hospital);\n    return hospital.id;\n}\nexports.initBloodDrive = initBloodDrive;\nfunction getHospitals() {\n    const hospitals = hospitalStorage.values();\n    if (hospitals.length === 0) {\n        return Result.Err(\"No hospitals found\");\n    }\n    return Result.Ok(hospitals);\n}\nexports.getHospitals = getHospitals;\nfunction getPatients() {\n    const patients = patientStorage.values();\n    if (patients.length === 0) {\n        return Result.Err(\"No patients found\");\n    }\n    return Result.Ok(patients);\n}\nexports.getPatients = getPatients;\nfunction getDonors() {\n    const donors = donorStorage.values();\n    if (donors.length === 0) {\n        return Result.Err(\"No donors found\");\n    }\n    return Result.Ok(donors);\n}\nexports.getDonors = getDonors;\nfunction addPatient(name, blood_type) {\n    const patient = {\n        id: v4_default(),\n        name,\n        blood_type,\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    patientStorage.insert(patient.id, patient);\n    return patient.id;\n}\nexports.addPatient = addPatient;\nfunction addDonor(name, blood_type) {\n    const donor = {\n        id: v4_default(),\n        name,\n        blood_type,\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    donorStorage.insert(donor.id, donor);\n    return donor.id;\n}\nexports.addDonor = addDonor;\nfunction makePledge(payload) {\n    const donor = match(donorStorage.get(payload.donor_id), {\n        Some: (donor2)=>donor2\n        ,\n        None: ()=>({})\n    });\n    const patient = match(patientStorage.get(payload.patient_id), {\n        Some: (patient2)=>patient2\n        ,\n        None: ()=>({})\n    });\n    if (!donor.id || !patient.id) {\n        return {\n            msg: \"Invalid donor or patient ID\",\n            amount: 0\n        };\n    }\n    const pledge = {\n        id: v4_default(),\n        donor_id: donor.id,\n        patient_id: patient.id,\n        amount: payload.amount,\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    pledgeStorage.insert(pledge.id, pledge);\n    return {\n        msg: `Thank you for your pledge. Amount: $${payload.amount}`,\n        amount: parseFloat(payload.amount)\n    };\n}\nexports.makePledge = makePledge;\nfunction getPledgesForPatient(patient_id) {\n    const pledges = pledgeStorage.values().filter((pledge)=>pledge.patient_id === patient_id\n    );\n    if (pledges.length === 0) {\n        return Result.Err(\"No pledges found for the specified patient\");\n    }\n    return Result.Ok(pledges);\n}\nexports.getPledgesForPatient = getPledgesForPatient;\nfunction updatePatient(id, name, blood_type) {\n    const existingPatient = match(patientStorage.get(id), {\n        Some: (patient)=>patient\n        ,\n        None: ()=>({})\n    });\n    if (existingPatient.id) {\n        existingPatient.name = name;\n        existingPatient.blood_type = blood_type;\n        existingPatient.updated_at = Opt.Some(ic.time());\n        patientStorage.insert(existingPatient.id, existingPatient);\n        return existingPatient.id;\n    }\n    return \"Patient not found\";\n}\nexports.updatePatient = updatePatient;\nfunction updateDonor(id, name, blood_type) {\n    const existingDonor = match(donorStorage.get(id), {\n        Some: (donor)=>donor\n        ,\n        None: ()=>({})\n    });\n    if (existingDonor.id) {\n        existingDonor.name = name;\n        existingDonor.blood_type = blood_type;\n        existingDonor.updated_at = Opt.Some(ic.time());\n        donorStorage.insert(existingDonor.id, existingDonor);\n        return existingDonor.id;\n    }\n    return \"Donor not found\";\n}\nexports.updateDonor = updateDonor;\nfunction deletePatient(id) {\n    const existingPatient = match(patientStorage.get(id), {\n        Some: (patient)=>patient\n        ,\n        None: ()=>({})\n    });\n    if (existingPatient.id) {\n        patientStorage.remove(id);\n        return `Patient with ID: ${id} removed successfully`;\n    }\n    return \"Patient not found\";\n}\nexports.deletePatient = deletePatient;\nfunction deleteDonor(id) {\n    const existingDonor = match(donorStorage.get(id), {\n        Some: (donor)=>donor\n        ,\n        None: ()=>({})\n    });\n    if (existingDonor.id) {\n        donorStorage.remove(id);\n        return `Donor with ID: ${id} removed successfully`;\n    }\n    return \"Donor not found\";\n}\nexports.deleteDonor = deleteDonor;\nfunction updatePledge(id, amount) {\n    const existingPledge = match(pledgeStorage.get(id), {\n        Some: (pledge)=>pledge\n        ,\n        None: ()=>({})\n    });\n    if (existingPledge.id) {\n        existingPledge.amount = amount;\n        existingPledge.updated_at = Opt.Some(ic.time());\n        pledgeStorage.insert(existingPledge.id, existingPledge);\n        return `Pledge with ID: ${id} updated successfully`;\n    }\n    return \"Pledge not found\";\n}\nexports.updatePledge = updatePledge;\nfunction deletePledge(id) {\n    const existingPledge = match(pledgeStorage.get(id), {\n        Some: (pledge)=>pledge\n        ,\n        None: ()=>({})\n    });\n    if (existingPledge.id) {\n        pledgeStorage.remove(id);\n        return `Pledge with ID: ${id} removed successfully`;\n    }\n    return \"Pledge not found\";\n}\nexports.deletePledge = deletePledge;\nglobalThis.crypto = {\n    getRandomValues: ()=>{\n        let array = new Uint8Array(32);\n        for(let i10 = 0; i10 < array.length; i10++){\n            array[i10] = Math.floor(Math.random() * 256);\n        }\n        return array;\n    }\n};\n\n        ";
+static MAIN_JS: &'static str = "\n            // TODO we should centralize/standardize where we add global variables to the JS, we are doing this in multiple places (i.e. the exports variable is not here, found in init/post_upgrade)\n            globalThis.console = {\n                ...globalThis.console,\n                log: (...args) => {\n                    ic.print(...args);\n                }\n            };\n\n            \nObject.defineProperty(exports, \"__esModule\", {\n    value: true\n});\nexports.deleteMedicalRecord = exports.updateMedicalRecord = exports.getMedicalRecordsForPatient = exports.addMedicalRecord = exports.getOrgansReceivedByPatient = exports.getOrgansDonatedByDonor = exports.getOrganDonorsForPatient = exports.findMatchingDonorsForPatient = exports.deleteOrgan = exports.updateOrgan = exports.getOrgans = exports.addOrgan = exports.removeExpiredPledges = exports.updateHospitalInfo = exports.getPledgeSummary = exports.findPotentialDonorsForPatient = exports.deletePledge = exports.updatePledge = exports.deleteDonor = exports.deletePatient = exports.updateDonor = exports.updatePatient = exports.getPledgesForPatient = exports.makePledge = exports.addDonor = exports.addPatient = exports.getDonors = exports.getPatients = exports.getHospitals = exports.initBloodDrive = exports.Principal = void 0;\nvar __create = Object.create;\nvar __defProp = Object.defineProperty;\nvar __getOwnPropDesc = Object.getOwnPropertyDescriptor;\nvar __getOwnPropNames = Object.getOwnPropertyNames;\nvar __getProtoOf = Object.getPrototypeOf;\nvar __hasOwnProp = Object.prototype.hasOwnProperty;\nvar __markAsModule = (target)=>__defProp(target, \"__esModule\", {\n        value: true\n    })\n;\nvar __commonJS = (cb, mod)=>function __require() {\n        return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = {\n            exports: {}\n        }).exports, mod), mod.exports;\n    }\n;\nvar __reExport = (target, module2, copyDefault, desc)=>{\n    if (module2 && typeof module2 === \"object\" || typeof module2 === \"function\") {\n        for (let key of __getOwnPropNames(module2))if (!__hasOwnProp.call(target, key) && (copyDefault || key !== \"default\")) __defProp(target, key, {\n            get: ()=>module2[key]\n            ,\n            enumerable: !(desc = __getOwnPropDesc(module2, key)) || desc.enumerable\n        });\n    }\n    return target;\n};\nvar __toESM = (module2, isNodeMode)=>{\n    return __reExport(__markAsModule(__defProp(module2 != null ? __create(__getProtoOf(module2)) : {}, \"default\", !isNodeMode && module2 && module2.__esModule ? {\n        get: ()=>module2.default\n        ,\n        enumerable: true\n    } : {\n        value: module2,\n        enumerable: true\n    })), module2);\n};\n// node_modules/js-sha256/src/sha256.js\nvar require_sha256 = __commonJS({\n    \"node_modules/js-sha256/src/sha256.js\" (exports1, module) {\n        (function() {\n            \n            var ERROR = \"input is invalid type\";\n            var WINDOW = typeof window === \"object\";\n            var root = WINDOW ? window : {};\n            if (root.JS_SHA256_NO_WINDOW) {\n                WINDOW = false;\n            }\n            var WEB_WORKER = !WINDOW && typeof self === \"object\";\n            var NODE_JS = !root.JS_SHA256_NO_NODE_JS && typeof process === \"object\" && process.versions && process.versions.node;\n            if (NODE_JS) {\n                root = global;\n            } else if (WEB_WORKER) {\n                root = self;\n            }\n            var COMMON_JS = !root.JS_SHA256_NO_COMMON_JS && typeof module === \"object\" && module.exports;\n            var AMD = typeof define === \"function\" && define.amd;\n            var ARRAY_BUFFER = !root.JS_SHA256_NO_ARRAY_BUFFER && typeof ArrayBuffer !== \"undefined\";\n            var HEX_CHARS = \"0123456789abcdef\".split(\"\");\n            var EXTRA = [\n                -2147483648,\n                8388608,\n                32768,\n                128\n            ];\n            var SHIFT = [\n                24,\n                16,\n                8,\n                0\n            ];\n            var K = [\n                1116352408,\n                1899447441,\n                3049323471,\n                3921009573,\n                961987163,\n                1508970993,\n                2453635748,\n                2870763221,\n                3624381080,\n                310598401,\n                607225278,\n                1426881987,\n                1925078388,\n                2162078206,\n                2614888103,\n                3248222580,\n                3835390401,\n                4022224774,\n                264347078,\n                604807628,\n                770255983,\n                1249150122,\n                1555081692,\n                1996064986,\n                2554220882,\n                2821834349,\n                2952996808,\n                3210313671,\n                3336571891,\n                3584528711,\n                113926993,\n                338241895,\n                666307205,\n                773529912,\n                1294757372,\n                1396182291,\n                1695183700,\n                1986661051,\n                2177026350,\n                2456956037,\n                2730485921,\n                2820302411,\n                3259730800,\n                3345764771,\n                3516065817,\n                3600352804,\n                4094571909,\n                275423344,\n                430227734,\n                506948616,\n                659060556,\n                883997877,\n                958139571,\n                1322822218,\n                1537002063,\n                1747873779,\n                1955562222,\n                2024104815,\n                2227730452,\n                2361852424,\n                2428436474,\n                2756734187,\n                3204031479,\n                3329325298\n            ];\n            var OUTPUT_TYPES = [\n                \"hex\",\n                \"array\",\n                \"digest\",\n                \"arrayBuffer\"\n            ];\n            var blocks = [];\n            if (root.JS_SHA256_NO_NODE_JS || !Array.isArray) {\n                Array.isArray = function(obj) {\n                    return Object.prototype.toString.call(obj) === \"[object Array]\";\n                };\n            }\n            if (ARRAY_BUFFER && (root.JS_SHA256_NO_ARRAY_BUFFER_IS_VIEW || !ArrayBuffer.isView)) {\n                ArrayBuffer.isView = function(obj) {\n                    return typeof obj === \"object\" && obj.buffer && obj.buffer.constructor === ArrayBuffer;\n                };\n            }\n            var createOutputMethod = function(outputType, is2242) {\n                return function(message) {\n                    return new Sha256(is2242, true).update(message)[outputType]();\n                };\n            };\n            var createMethod = function(is2242) {\n                var method2 = createOutputMethod(\"hex\", is2242);\n                if (NODE_JS) {\n                    method2 = nodeWrap(method2, is2242);\n                }\n                method2.create = function() {\n                    return new Sha256(is2242);\n                };\n                method2.update = function(message) {\n                    return method2.create().update(message);\n                };\n                for(var i2 = 0; i2 < OUTPUT_TYPES.length; ++i2){\n                    var type = OUTPUT_TYPES[i2];\n                    method2[type] = createOutputMethod(type, is2242);\n                }\n                return method2;\n            };\n            var nodeWrap = function(method, is224) {\n                var crypto = eval(\"require('crypto')\");\n                var Buffer = eval(\"require('buffer').Buffer\");\n                var algorithm = is224 ? \"sha224\" : \"sha256\";\n                var nodeMethod = function(message) {\n                    if (typeof message === \"string\") {\n                        return crypto.createHash(algorithm).update(message, \"utf8\").digest(\"hex\");\n                    } else {\n                        if (message === null || message === void 0) {\n                            throw new Error(ERROR);\n                        } else if (message.constructor === ArrayBuffer) {\n                            message = new Uint8Array(message);\n                        }\n                    }\n                    if (Array.isArray(message) || ArrayBuffer.isView(message) || message.constructor === Buffer) {\n                        return crypto.createHash(algorithm).update(new Buffer(message)).digest(\"hex\");\n                    } else {\n                        return method(message);\n                    }\n                };\n                return nodeMethod;\n            };\n            var createHmacOutputMethod = function(outputType, is2242) {\n                return function(key, message) {\n                    return new HmacSha256(key, is2242, true).update(message)[outputType]();\n                };\n            };\n            var createHmacMethod = function(is2242) {\n                var method2 = createHmacOutputMethod(\"hex\", is2242);\n                method2.create = function(key) {\n                    return new HmacSha256(key, is2242);\n                };\n                method2.update = function(key, message) {\n                    return method2.create(key).update(message);\n                };\n                for(var i3 = 0; i3 < OUTPUT_TYPES.length; ++i3){\n                    var type = OUTPUT_TYPES[i3];\n                    method2[type] = createHmacOutputMethod(type, is2242);\n                }\n                return method2;\n            };\n            function Sha256(is2242, sharedMemory) {\n                if (sharedMemory) {\n                    blocks[0] = blocks[16] = blocks[1] = blocks[2] = blocks[3] = blocks[4] = blocks[5] = blocks[6] = blocks[7] = blocks[8] = blocks[9] = blocks[10] = blocks[11] = blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;\n                    this.blocks = blocks;\n                } else {\n                    this.blocks = [\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0,\n                        0\n                    ];\n                }\n                if (is2242) {\n                    this.h0 = 3238371032;\n                    this.h1 = 914150663;\n                    this.h2 = 812702999;\n                    this.h3 = 4144912697;\n                    this.h4 = 4290775857;\n                    this.h5 = 1750603025;\n                    this.h6 = 1694076839;\n                    this.h7 = 3204075428;\n                } else {\n                    this.h0 = 1779033703;\n                    this.h1 = 3144134277;\n                    this.h2 = 1013904242;\n                    this.h3 = 2773480762;\n                    this.h4 = 1359893119;\n                    this.h5 = 2600822924;\n                    this.h6 = 528734635;\n                    this.h7 = 1541459225;\n                }\n                this.block = this.start = this.bytes = this.hBytes = 0;\n                this.finalized = this.hashed = false;\n                this.first = true;\n                this.is224 = is2242;\n            }\n            Sha256.prototype.update = function(message) {\n                if (this.finalized) {\n                    return;\n                }\n                var notString, type = typeof message;\n                if (type !== \"string\") {\n                    if (type === \"object\") {\n                        if (message === null) {\n                            throw new Error(ERROR);\n                        } else if (ARRAY_BUFFER && message.constructor === ArrayBuffer) {\n                            message = new Uint8Array(message);\n                        } else if (!Array.isArray(message)) {\n                            if (!ARRAY_BUFFER || !ArrayBuffer.isView(message)) {\n                                throw new Error(ERROR);\n                            }\n                        }\n                    } else {\n                        throw new Error(ERROR);\n                    }\n                    notString = true;\n                }\n                var code, index = 0, i4, length = message.length, blocks2 = this.blocks;\n                while(index < length){\n                    if (this.hashed) {\n                        this.hashed = false;\n                        blocks2[0] = this.block;\n                        blocks2[16] = blocks2[1] = blocks2[2] = blocks2[3] = blocks2[4] = blocks2[5] = blocks2[6] = blocks2[7] = blocks2[8] = blocks2[9] = blocks2[10] = blocks2[11] = blocks2[12] = blocks2[13] = blocks2[14] = blocks2[15] = 0;\n                    }\n                    if (notString) {\n                        for(i4 = this.start; index < length && i4 < 64; ++index){\n                            blocks2[i4 >> 2] |= message[index] << SHIFT[(i4++) & 3];\n                        }\n                    } else {\n                        for(i4 = this.start; index < length && i4 < 64; ++index){\n                            code = message.charCodeAt(index);\n                            if (code < 128) {\n                                blocks2[i4 >> 2] |= code << SHIFT[(i4++) & 3];\n                            } else if (code < 2048) {\n                                blocks2[i4 >> 2] |= (192 | code >> 6) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code & 63) << SHIFT[(i4++) & 3];\n                            } else if (code < 55296 || code >= 57344) {\n                                blocks2[i4 >> 2] |= (224 | code >> 12) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code >> 6 & 63) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code & 63) << SHIFT[(i4++) & 3];\n                            } else {\n                                code = 65536 + ((code & 1023) << 10 | message.charCodeAt(++index) & 1023);\n                                blocks2[i4 >> 2] |= (240 | code >> 18) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code >> 12 & 63) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code >> 6 & 63) << SHIFT[(i4++) & 3];\n                                blocks2[i4 >> 2] |= (128 | code & 63) << SHIFT[(i4++) & 3];\n                            }\n                        }\n                    }\n                    this.lastByteIndex = i4;\n                    this.bytes += i4 - this.start;\n                    if (i4 >= 64) {\n                        this.block = blocks2[16];\n                        this.start = i4 - 64;\n                        this.hash();\n                        this.hashed = true;\n                    } else {\n                        this.start = i4;\n                    }\n                }\n                if (this.bytes > 4294967295) {\n                    this.hBytes += this.bytes / 4294967296 << 0;\n                    this.bytes = this.bytes % 4294967296;\n                }\n                return this;\n            };\n            Sha256.prototype.finalize = function() {\n                if (this.finalized) {\n                    return;\n                }\n                this.finalized = true;\n                var blocks2 = this.blocks, i5 = this.lastByteIndex;\n                blocks2[16] = this.block;\n                blocks2[i5 >> 2] |= EXTRA[i5 & 3];\n                this.block = blocks2[16];\n                if (i5 >= 56) {\n                    if (!this.hashed) {\n                        this.hash();\n                    }\n                    blocks2[0] = this.block;\n                    blocks2[16] = blocks2[1] = blocks2[2] = blocks2[3] = blocks2[4] = blocks2[5] = blocks2[6] = blocks2[7] = blocks2[8] = blocks2[9] = blocks2[10] = blocks2[11] = blocks2[12] = blocks2[13] = blocks2[14] = blocks2[15] = 0;\n                }\n                blocks2[14] = this.hBytes << 3 | this.bytes >>> 29;\n                blocks2[15] = this.bytes << 3;\n                this.hash();\n            };\n            Sha256.prototype.hash = function() {\n                var a = this.h0, b = this.h1, c = this.h2, d = this.h3, e = this.h4, f = this.h5, g = this.h6, h = this.h7, blocks2 = this.blocks, j, s0, s1, maj, t1, t2, ch, ab, da, cd, bc;\n                for(j = 16; j < 64; ++j){\n                    t1 = blocks2[j - 15];\n                    s0 = (t1 >>> 7 | t1 << 25) ^ (t1 >>> 18 | t1 << 14) ^ t1 >>> 3;\n                    t1 = blocks2[j - 2];\n                    s1 = (t1 >>> 17 | t1 << 15) ^ (t1 >>> 19 | t1 << 13) ^ t1 >>> 10;\n                    blocks2[j] = blocks2[j - 16] + s0 + blocks2[j - 7] + s1 << 0;\n                }\n                bc = b & c;\n                for(j = 0; j < 64; j += 4){\n                    if (this.first) {\n                        if (this.is224) {\n                            ab = 300032;\n                            t1 = blocks2[0] - 1413257819;\n                            h = t1 - 150054599 << 0;\n                            d = t1 + 24177077 << 0;\n                        } else {\n                            ab = 704751109;\n                            t1 = blocks2[0] - 210244248;\n                            h = t1 - 1521486534 << 0;\n                            d = t1 + 143694565 << 0;\n                        }\n                        this.first = false;\n                    } else {\n                        s0 = (a >>> 2 | a << 30) ^ (a >>> 13 | a << 19) ^ (a >>> 22 | a << 10);\n                        s1 = (e >>> 6 | e << 26) ^ (e >>> 11 | e << 21) ^ (e >>> 25 | e << 7);\n                        ab = a & b;\n                        maj = ab ^ a & c ^ bc;\n                        ch = e & f ^ ~e & g;\n                        t1 = h + s1 + ch + K[j] + blocks2[j];\n                        t2 = s0 + maj;\n                        h = d + t1 << 0;\n                        d = t1 + t2 << 0;\n                    }\n                    s0 = (d >>> 2 | d << 30) ^ (d >>> 13 | d << 19) ^ (d >>> 22 | d << 10);\n                    s1 = (h >>> 6 | h << 26) ^ (h >>> 11 | h << 21) ^ (h >>> 25 | h << 7);\n                    da = d & a;\n                    maj = da ^ d & b ^ ab;\n                    ch = h & e ^ ~h & f;\n                    t1 = g + s1 + ch + K[j + 1] + blocks2[j + 1];\n                    t2 = s0 + maj;\n                    g = c + t1 << 0;\n                    c = t1 + t2 << 0;\n                    s0 = (c >>> 2 | c << 30) ^ (c >>> 13 | c << 19) ^ (c >>> 22 | c << 10);\n                    s1 = (g >>> 6 | g << 26) ^ (g >>> 11 | g << 21) ^ (g >>> 25 | g << 7);\n                    cd = c & d;\n                    maj = cd ^ c & a ^ da;\n                    ch = g & h ^ ~g & e;\n                    t1 = f + s1 + ch + K[j + 2] + blocks2[j + 2];\n                    t2 = s0 + maj;\n                    f = b + t1 << 0;\n                    b = t1 + t2 << 0;\n                    s0 = (b >>> 2 | b << 30) ^ (b >>> 13 | b << 19) ^ (b >>> 22 | b << 10);\n                    s1 = (f >>> 6 | f << 26) ^ (f >>> 11 | f << 21) ^ (f >>> 25 | f << 7);\n                    bc = b & c;\n                    maj = bc ^ b & d ^ cd;\n                    ch = f & g ^ ~f & h;\n                    t1 = e + s1 + ch + K[j + 3] + blocks2[j + 3];\n                    t2 = s0 + maj;\n                    e = a + t1 << 0;\n                    a = t1 + t2 << 0;\n                }\n                this.h0 = this.h0 + a << 0;\n                this.h1 = this.h1 + b << 0;\n                this.h2 = this.h2 + c << 0;\n                this.h3 = this.h3 + d << 0;\n                this.h4 = this.h4 + e << 0;\n                this.h5 = this.h5 + f << 0;\n                this.h6 = this.h6 + g << 0;\n                this.h7 = this.h7 + h << 0;\n            };\n            Sha256.prototype.hex = function() {\n                this.finalize();\n                var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5, h6 = this.h6, h7 = this.h7;\n                var hex = HEX_CHARS[h0 >> 28 & 15] + HEX_CHARS[h0 >> 24 & 15] + HEX_CHARS[h0 >> 20 & 15] + HEX_CHARS[h0 >> 16 & 15] + HEX_CHARS[h0 >> 12 & 15] + HEX_CHARS[h0 >> 8 & 15] + HEX_CHARS[h0 >> 4 & 15] + HEX_CHARS[h0 & 15] + HEX_CHARS[h1 >> 28 & 15] + HEX_CHARS[h1 >> 24 & 15] + HEX_CHARS[h1 >> 20 & 15] + HEX_CHARS[h1 >> 16 & 15] + HEX_CHARS[h1 >> 12 & 15] + HEX_CHARS[h1 >> 8 & 15] + HEX_CHARS[h1 >> 4 & 15] + HEX_CHARS[h1 & 15] + HEX_CHARS[h2 >> 28 & 15] + HEX_CHARS[h2 >> 24 & 15] + HEX_CHARS[h2 >> 20 & 15] + HEX_CHARS[h2 >> 16 & 15] + HEX_CHARS[h2 >> 12 & 15] + HEX_CHARS[h2 >> 8 & 15] + HEX_CHARS[h2 >> 4 & 15] + HEX_CHARS[h2 & 15] + HEX_CHARS[h3 >> 28 & 15] + HEX_CHARS[h3 >> 24 & 15] + HEX_CHARS[h3 >> 20 & 15] + HEX_CHARS[h3 >> 16 & 15] + HEX_CHARS[h3 >> 12 & 15] + HEX_CHARS[h3 >> 8 & 15] + HEX_CHARS[h3 >> 4 & 15] + HEX_CHARS[h3 & 15] + HEX_CHARS[h4 >> 28 & 15] + HEX_CHARS[h4 >> 24 & 15] + HEX_CHARS[h4 >> 20 & 15] + HEX_CHARS[h4 >> 16 & 15] + HEX_CHARS[h4 >> 12 & 15] + HEX_CHARS[h4 >> 8 & 15] + HEX_CHARS[h4 >> 4 & 15] + HEX_CHARS[h4 & 15] + HEX_CHARS[h5 >> 28 & 15] + HEX_CHARS[h5 >> 24 & 15] + HEX_CHARS[h5 >> 20 & 15] + HEX_CHARS[h5 >> 16 & 15] + HEX_CHARS[h5 >> 12 & 15] + HEX_CHARS[h5 >> 8 & 15] + HEX_CHARS[h5 >> 4 & 15] + HEX_CHARS[h5 & 15] + HEX_CHARS[h6 >> 28 & 15] + HEX_CHARS[h6 >> 24 & 15] + HEX_CHARS[h6 >> 20 & 15] + HEX_CHARS[h6 >> 16 & 15] + HEX_CHARS[h6 >> 12 & 15] + HEX_CHARS[h6 >> 8 & 15] + HEX_CHARS[h6 >> 4 & 15] + HEX_CHARS[h6 & 15];\n                if (!this.is224) {\n                    hex += HEX_CHARS[h7 >> 28 & 15] + HEX_CHARS[h7 >> 24 & 15] + HEX_CHARS[h7 >> 20 & 15] + HEX_CHARS[h7 >> 16 & 15] + HEX_CHARS[h7 >> 12 & 15] + HEX_CHARS[h7 >> 8 & 15] + HEX_CHARS[h7 >> 4 & 15] + HEX_CHARS[h7 & 15];\n                }\n                return hex;\n            };\n            Sha256.prototype.toString = Sha256.prototype.hex;\n            Sha256.prototype.digest = function() {\n                this.finalize();\n                var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5, h6 = this.h6, h7 = this.h7;\n                var arr = [\n                    h0 >> 24 & 255,\n                    h0 >> 16 & 255,\n                    h0 >> 8 & 255,\n                    h0 & 255,\n                    h1 >> 24 & 255,\n                    h1 >> 16 & 255,\n                    h1 >> 8 & 255,\n                    h1 & 255,\n                    h2 >> 24 & 255,\n                    h2 >> 16 & 255,\n                    h2 >> 8 & 255,\n                    h2 & 255,\n                    h3 >> 24 & 255,\n                    h3 >> 16 & 255,\n                    h3 >> 8 & 255,\n                    h3 & 255,\n                    h4 >> 24 & 255,\n                    h4 >> 16 & 255,\n                    h4 >> 8 & 255,\n                    h4 & 255,\n                    h5 >> 24 & 255,\n                    h5 >> 16 & 255,\n                    h5 >> 8 & 255,\n                    h5 & 255,\n                    h6 >> 24 & 255,\n                    h6 >> 16 & 255,\n                    h6 >> 8 & 255,\n                    h6 & 255\n                ];\n                if (!this.is224) {\n                    arr.push(h7 >> 24 & 255, h7 >> 16 & 255, h7 >> 8 & 255, h7 & 255);\n                }\n                return arr;\n            };\n            Sha256.prototype.array = Sha256.prototype.digest;\n            Sha256.prototype.arrayBuffer = function() {\n                this.finalize();\n                var buffer = new ArrayBuffer(this.is224 ? 28 : 32);\n                var dataView = new DataView(buffer);\n                dataView.setUint32(0, this.h0);\n                dataView.setUint32(4, this.h1);\n                dataView.setUint32(8, this.h2);\n                dataView.setUint32(12, this.h3);\n                dataView.setUint32(16, this.h4);\n                dataView.setUint32(20, this.h5);\n                dataView.setUint32(24, this.h6);\n                if (!this.is224) {\n                    dataView.setUint32(28, this.h7);\n                }\n                return buffer;\n            };\n            function HmacSha256(key, is2242, sharedMemory) {\n                var i6, type = typeof key;\n                if (type === \"string\") {\n                    var bytes = [], length = key.length, index = 0, code;\n                    for(i6 = 0; i6 < length; ++i6){\n                        code = key.charCodeAt(i6);\n                        if (code < 128) {\n                            bytes[index++] = code;\n                        } else if (code < 2048) {\n                            bytes[index++] = 192 | code >> 6;\n                            bytes[index++] = 128 | code & 63;\n                        } else if (code < 55296 || code >= 57344) {\n                            bytes[index++] = 224 | code >> 12;\n                            bytes[index++] = 128 | code >> 6 & 63;\n                            bytes[index++] = 128 | code & 63;\n                        } else {\n                            code = 65536 + ((code & 1023) << 10 | key.charCodeAt(++i6) & 1023);\n                            bytes[index++] = 240 | code >> 18;\n                            bytes[index++] = 128 | code >> 12 & 63;\n                            bytes[index++] = 128 | code >> 6 & 63;\n                            bytes[index++] = 128 | code & 63;\n                        }\n                    }\n                    key = bytes;\n                } else {\n                    if (type === \"object\") {\n                        if (key === null) {\n                            throw new Error(ERROR);\n                        } else if (ARRAY_BUFFER && key.constructor === ArrayBuffer) {\n                            key = new Uint8Array(key);\n                        } else if (!Array.isArray(key)) {\n                            if (!ARRAY_BUFFER || !ArrayBuffer.isView(key)) {\n                                throw new Error(ERROR);\n                            }\n                        }\n                    } else {\n                        throw new Error(ERROR);\n                    }\n                }\n                if (key.length > 64) {\n                    key = new Sha256(is2242, true).update(key).array();\n                }\n                var oKeyPad = [], iKeyPad = [];\n                for(i6 = 0; i6 < 64; ++i6){\n                    var b = key[i6] || 0;\n                    oKeyPad[i6] = 92 ^ b;\n                    iKeyPad[i6] = 54 ^ b;\n                }\n                Sha256.call(this, is2242, sharedMemory);\n                this.update(iKeyPad);\n                this.oKeyPad = oKeyPad;\n                this.inner = true;\n                this.sharedMemory = sharedMemory;\n            }\n            HmacSha256.prototype = new Sha256();\n            HmacSha256.prototype.finalize = function() {\n                Sha256.prototype.finalize.call(this);\n                if (this.inner) {\n                    this.inner = false;\n                    var innerHash = this.array();\n                    Sha256.call(this, this.is224, this.sharedMemory);\n                    this.update(this.oKeyPad);\n                    this.update(innerHash);\n                    Sha256.prototype.finalize.call(this);\n                }\n            };\n            var exports = createMethod();\n            exports.sha256 = exports;\n            exports.sha224 = createMethod(true);\n            exports.sha256.hmac = createHmacMethod();\n            exports.sha224.hmac = createHmacMethod(true);\n            if (COMMON_JS) {\n                module.exports = exports;\n            } else {\n                root.sha256 = exports.sha256;\n                root.sha224 = exports.sha224;\n                if (AMD) {\n                    define(function() {\n                        return exports;\n                    });\n                }\n            }\n        })();\n    }\n});\n// node_modules/@dfinity/principal/lib/esm/utils/base32.js\nvar alphabet = \"abcdefghijklmnopqrstuvwxyz234567\";\nvar lookupTable = /* @__PURE__ */ Object.create(null);\nfor(let i = 0; i < alphabet.length; i++){\n    lookupTable[alphabet[i]] = i;\n}\nlookupTable[\"0\"] = lookupTable.o;\nlookupTable[\"1\"] = lookupTable.i;\nfunction encode(input) {\n    let skip = 0;\n    let bits = 0;\n    let output = \"\";\n    function encodeByte(byte) {\n        if (skip < 0) {\n            bits |= byte >> -skip;\n        } else {\n            bits = byte << skip & 248;\n        }\n        if (skip > 3) {\n            skip -= 8;\n            return 1;\n        }\n        if (skip < 4) {\n            output += alphabet[bits >> 3];\n            skip += 5;\n        }\n        return 0;\n    }\n    for(let i7 = 0; i7 < input.length;){\n        i7 += encodeByte(input[i7]);\n    }\n    return output + (skip < 0 ? alphabet[bits >> 3] : \"\");\n}\nfunction decode(input) {\n    let skip = 0;\n    let byte = 0;\n    const output = new Uint8Array(input.length * 4 / 3 | 0);\n    let o = 0;\n    function decodeChar(char) {\n        let val = lookupTable[char.toLowerCase()];\n        if (val === void 0) {\n            throw new Error(`Invalid character: ${JSON.stringify(char)}`);\n        }\n        val <<= 3;\n        byte |= val >>> skip;\n        skip += 5;\n        if (skip >= 8) {\n            output[o++] = byte;\n            skip -= 8;\n            if (skip > 0) {\n                byte = val << 5 - skip & 255;\n            } else {\n                byte = 0;\n            }\n        }\n    }\n    for (const c of input){\n        decodeChar(c);\n    }\n    return output.slice(0, o);\n}\n// node_modules/@dfinity/principal/lib/esm/utils/getCrc.js\nvar lookUpTable = new Uint32Array([\n    0,\n    1996959894,\n    3993919788,\n    2567524794,\n    124634137,\n    1886057615,\n    3915621685,\n    2657392035,\n    249268274,\n    2044508324,\n    3772115230,\n    2547177864,\n    162941995,\n    2125561021,\n    3887607047,\n    2428444049,\n    498536548,\n    1789927666,\n    4089016648,\n    2227061214,\n    450548861,\n    1843258603,\n    4107580753,\n    2211677639,\n    325883990,\n    1684777152,\n    4251122042,\n    2321926636,\n    335633487,\n    1661365465,\n    4195302755,\n    2366115317,\n    997073096,\n    1281953886,\n    3579855332,\n    2724688242,\n    1006888145,\n    1258607687,\n    3524101629,\n    2768942443,\n    901097722,\n    1119000684,\n    3686517206,\n    2898065728,\n    853044451,\n    1172266101,\n    3705015759,\n    2882616665,\n    651767980,\n    1373503546,\n    3369554304,\n    3218104598,\n    565507253,\n    1454621731,\n    3485111705,\n    3099436303,\n    671266974,\n    1594198024,\n    3322730930,\n    2970347812,\n    795835527,\n    1483230225,\n    3244367275,\n    3060149565,\n    1994146192,\n    31158534,\n    2563907772,\n    4023717930,\n    1907459465,\n    112637215,\n    2680153253,\n    3904427059,\n    2013776290,\n    251722036,\n    2517215374,\n    3775830040,\n    2137656763,\n    141376813,\n    2439277719,\n    3865271297,\n    1802195444,\n    476864866,\n    2238001368,\n    4066508878,\n    1812370925,\n    453092731,\n    2181625025,\n    4111451223,\n    1706088902,\n    314042704,\n    2344532202,\n    4240017532,\n    1658658271,\n    366619977,\n    2362670323,\n    4224994405,\n    1303535960,\n    984961486,\n    2747007092,\n    3569037538,\n    1256170817,\n    1037604311,\n    2765210733,\n    3554079995,\n    1131014506,\n    879679996,\n    2909243462,\n    3663771856,\n    1141124467,\n    855842277,\n    2852801631,\n    3708648649,\n    1342533948,\n    654459306,\n    3188396048,\n    3373015174,\n    1466479909,\n    544179635,\n    3110523913,\n    3462522015,\n    1591671054,\n    702138776,\n    2966460450,\n    3352799412,\n    1504918807,\n    783551873,\n    3082640443,\n    3233442989,\n    3988292384,\n    2596254646,\n    62317068,\n    1957810842,\n    3939845945,\n    2647816111,\n    81470997,\n    1943803523,\n    3814918930,\n    2489596804,\n    225274430,\n    2053790376,\n    3826175755,\n    2466906013,\n    167816743,\n    2097651377,\n    4027552580,\n    2265490386,\n    503444072,\n    1762050814,\n    4150417245,\n    2154129355,\n    426522225,\n    1852507879,\n    4275313526,\n    2312317920,\n    282753626,\n    1742555852,\n    4189708143,\n    2394877945,\n    397917763,\n    1622183637,\n    3604390888,\n    2714866558,\n    953729732,\n    1340076626,\n    3518719985,\n    2797360999,\n    1068828381,\n    1219638859,\n    3624741850,\n    2936675148,\n    906185462,\n    1090812512,\n    3747672003,\n    2825379669,\n    829329135,\n    1181335161,\n    3412177804,\n    3160834842,\n    628085408,\n    1382605366,\n    3423369109,\n    3138078467,\n    570562233,\n    1426400815,\n    3317316542,\n    2998733608,\n    733239954,\n    1555261956,\n    3268935591,\n    3050360625,\n    752459403,\n    1541320221,\n    2607071920,\n    3965973030,\n    1969922972,\n    40735498,\n    2617837225,\n    3943577151,\n    1913087877,\n    83908371,\n    2512341634,\n    3803740692,\n    2075208622,\n    213261112,\n    2463272603,\n    3855990285,\n    2094854071,\n    198958881,\n    2262029012,\n    4057260610,\n    1759359992,\n    534414190,\n    2176718541,\n    4139329115,\n    1873836001,\n    414664567,\n    2282248934,\n    4279200368,\n    1711684554,\n    285281116,\n    2405801727,\n    4167216745,\n    1634467795,\n    376229701,\n    2685067896,\n    3608007406,\n    1308918612,\n    956543938,\n    2808555105,\n    3495958263,\n    1231636301,\n    1047427035,\n    2932959818,\n    3654703836,\n    1088359270,\n    936918000,\n    2847714899,\n    3736837829,\n    1202900863,\n    817233897,\n    3183342108,\n    3401237130,\n    1404277552,\n    615818150,\n    3134207493,\n    3453421203,\n    1423857449,\n    601450431,\n    3009837614,\n    3294710456,\n    1567103746,\n    711928724,\n    3020668471,\n    3272380065,\n    1510334235,\n    755167117\n]);\nfunction getCrc32(buf) {\n    const b = new Uint8Array(buf);\n    let crc = -1;\n    for(let i8 = 0; i8 < b.length; i8++){\n        const byte = b[i8];\n        const t = (byte ^ crc) & 255;\n        crc = lookUpTable[t] ^ crc >>> 8;\n    }\n    return (crc ^ -1) >>> 0;\n}\n// node_modules/@dfinity/principal/lib/esm/utils/sha224.js\nvar import_js_sha256 = __toESM(require_sha256());\nfunction sha224(data) {\n    const shaObj = import_js_sha256.sha224.create();\n    shaObj.update(data);\n    return new Uint8Array(shaObj.array());\n}\n// node_modules/@dfinity/principal/lib/esm/index.js\nvar SELF_AUTHENTICATING_SUFFIX = 2;\nvar ANONYMOUS_SUFFIX = 4;\nvar fromHexString = (hexString)=>{\n    var _a;\n    return new Uint8Array(((_a = hexString.match(/.{1,2}/g)) !== null && _a !== void 0 ? _a : []).map((byte)=>parseInt(byte, 16)\n    ));\n};\nvar toHexString = (bytes)=>bytes.reduce((str, byte)=>str + byte.toString(16).padStart(2, \"0\")\n    , \"\")\n;\nvar Principal = class {\n    static anonymous() {\n        return new this(new Uint8Array([\n            ANONYMOUS_SUFFIX\n        ]));\n    }\n    static selfAuthenticating(publicKey) {\n        const sha = sha224(publicKey);\n        return new this(new Uint8Array([\n            ...sha,\n            SELF_AUTHENTICATING_SUFFIX\n        ]));\n    }\n    static from(other) {\n        if (typeof other === \"string\") {\n            return Principal.fromText(other);\n        } else if (typeof other === \"object\" && other !== null && other._isPrincipal === true) {\n            return new Principal(other._arr);\n        }\n        throw new Error(`Impossible to convert ${JSON.stringify(other)} to Principal.`);\n    }\n    static fromHex(hex) {\n        return new this(fromHexString(hex));\n    }\n    static fromText(text2) {\n        const canisterIdNoDash = text2.toLowerCase().replace(/-/g, \"\");\n        let arr = decode(canisterIdNoDash);\n        arr = arr.slice(4, arr.length);\n        const principal = new this(arr);\n        if (principal.toText() !== text2) {\n            throw new Error(`Principal \"${principal.toText()}\" does not have a valid checksum (original value \"${text2}\" may not be a valid Principal ID).`);\n        }\n        return principal;\n    }\n    static fromUint8Array(arr) {\n        return new this(arr);\n    }\n    isAnonymous() {\n        return this._arr.byteLength === 1 && this._arr[0] === ANONYMOUS_SUFFIX;\n    }\n    toUint8Array() {\n        return this._arr;\n    }\n    toHex() {\n        return toHexString(this._arr).toUpperCase();\n    }\n    toText() {\n        const checksumArrayBuf = new ArrayBuffer(4);\n        const view = new DataView(checksumArrayBuf);\n        view.setUint32(0, getCrc32(this._arr));\n        const checksum = new Uint8Array(checksumArrayBuf);\n        const bytes = Uint8Array.from(this._arr);\n        const array = new Uint8Array([\n            ...checksum,\n            ...bytes\n        ]);\n        const result = encode(array);\n        const matches = result.match(/.{1,5}/g);\n        if (!matches) {\n            throw new Error();\n        }\n        return matches.join(\"-\");\n    }\n    toString() {\n        return this.toText();\n    }\n    constructor(_arr){\n        this._arr = _arr;\n        this._isPrincipal = true;\n    }\n};\nexports.Principal = Principal;\nvar _ic;\n// node_modules/azle/src/lib/ic.ts\nvar ic = (_ic = globalThis.ic) !== null && _ic !== void 0 ? _ic : {};\n// node_modules/azle/src/lib/candid_types/variant.ts\nfunction match(variant, matcher) {\n    for(const key in variant){\n        if (key in matcher) {\n            return matcher[key](variant[key]);\n        }\n    }\n    return matcher._();\n}\n// node_modules/azle/src/lib/candid_types/index.ts\nvar Opt = {\n    Some: (value)=>({\n            Some: value\n        })\n    ,\n    None: Object.freeze({\n        None: null\n    })\n};\n// node_modules/azle/src/lib/results.ts\nvar Result = {\n    Ok: (value)=>({\n            Ok: value\n        })\n    ,\n    Err: (value)=>({\n            Err: value\n        })\n};\n// node_modules/azle/src/lib/stable_b_tree_map.ts\nvar StableBTreeMap = class {\n    containsKey(key) {\n        if (arguments.length === 0) {\n            throw new Error(\"An argument for 'key' was not provided\");\n        }\n        return ic.stableBTreeMapContainsKey(this.memoryId, key);\n    }\n    get(key) {\n        if (arguments.length === 0) {\n            throw new Error(\"An argument for 'key' was not provided\");\n        }\n        return ic.stableBTreeMapGet(this.memoryId, key);\n    }\n    insert(key, value) {\n        if (arguments.length === 0) {\n            throw new Error(\"An argument for 'key' was not provided\");\n        }\n        if (arguments.length === 1) {\n            throw new Error(\"An argument for 'value' was not provided\");\n        }\n        return ic.stableBTreeMapInsert(this.memoryId, key, value);\n    }\n    isEmpty() {\n        return ic.stableBTreeMapIsEmpty(this.memoryId);\n    }\n    items() {\n        return ic.stableBTreeMapItems(this.memoryId);\n    }\n    keys() {\n        return ic.stableBTreeMapKeys(this.memoryId);\n    }\n    len() {\n        return ic.stableBTreeMapLen(this.memoryId);\n    }\n    remove(key) {\n        if (arguments.length === 0) {\n            throw new Error(\"An argument for 'key' was not provided\");\n        }\n        return ic.stableBTreeMapRemove(this.memoryId, key);\n    }\n    values() {\n        return ic.stableBTreeMapValues(this.memoryId);\n    }\n    constructor(memoryId, maxKeySize, maxValueSize){\n        this.memoryId = memoryId;\n    }\n};\n// node_modules/uuid/dist/esm-browser/rng.js\nvar getRandomValues;\nvar rnds8 = new Uint8Array(16);\nfunction rng() {\n    if (!getRandomValues) {\n        getRandomValues = typeof crypto !== \"undefined\" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);\n        if (!getRandomValues) {\n            throw new Error(\"crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported\");\n        }\n    }\n    return getRandomValues(rnds8);\n}\n// node_modules/uuid/dist/esm-browser/stringify.js\nvar byteToHex = [];\nfor(let i1 = 0; i1 < 256; ++i1){\n    byteToHex.push((i1 + 256).toString(16).slice(1));\n}\nfunction unsafeStringify(arr, offset = 0) {\n    return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + \"-\" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + \"-\" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + \"-\" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + \"-\" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];\n}\n// node_modules/uuid/dist/esm-browser/native.js\nvar randomUUID = typeof crypto !== \"undefined\" && crypto.randomUUID && crypto.randomUUID.bind(crypto);\nvar native_default = {\n    randomUUID\n};\n// node_modules/uuid/dist/esm-browser/v4.js\nfunction v4(options, buf, offset) {\n    if (native_default.randomUUID && !buf && !options) {\n        return native_default.randomUUID();\n    }\n    options = options || {};\n    const rnds = options.random || (options.rng || rng)();\n    rnds[6] = rnds[6] & 15 | 64;\n    rnds[8] = rnds[8] & 63 | 128;\n    if (buf) {\n        offset = offset || 0;\n        for(let i9 = 0; i9 < 16; ++i9){\n            buf[offset + i9] = rnds[i9];\n        }\n        return buf;\n    }\n    return unsafeStringify(rnds);\n}\nvar v4_default = v4;\n// src/index.ts\nvar hospitalStorage = new StableBTreeMap(0, 44, 512);\nvar patientStorage = new StableBTreeMap(1, 44, 512);\nvar donorStorage = new StableBTreeMap(2, 44, 512);\nvar pledgeStorage = new StableBTreeMap(3, 44, 512);\nfunction initBloodDrive() {\n    if (!hospitalStorage.isEmpty() || !patientStorage.isEmpty() || !donorStorage.isEmpty() || !pledgeStorage.isEmpty()) {\n        return `Blood donation drive has already been initialized`;\n    }\n    const hospital = {\n        id: v4_default(),\n        name: \"Central Hospital\",\n        location: \"City Center\",\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    hospitalStorage.insert(hospital.id, hospital);\n    return hospital.id;\n}\nexports.initBloodDrive = initBloodDrive;\nfunction getHospitals() {\n    const hospitals = hospitalStorage.values();\n    if (hospitals.length === 0) {\n        return Result.Err(\"No hospitals found\");\n    }\n    return Result.Ok(hospitals);\n}\nexports.getHospitals = getHospitals;\nfunction getPatients() {\n    const patients = patientStorage.values();\n    if (patients.length === 0) {\n        return Result.Err(\"No patients found\");\n    }\n    return Result.Ok(patients);\n}\nexports.getPatients = getPatients;\nfunction getDonors() {\n    const donors = donorStorage.values();\n    if (donors.length === 0) {\n        return Result.Err(\"No donors found\");\n    }\n    return Result.Ok(donors);\n}\nexports.getDonors = getDonors;\nfunction addPatient(name, blood_type) {\n    const patient = {\n        id: v4_default(),\n        name,\n        blood_type,\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    patientStorage.insert(patient.id, patient);\n    return patient.id;\n}\nexports.addPatient = addPatient;\nfunction addDonor(name, blood_type) {\n    const donor = {\n        id: v4_default(),\n        name,\n        blood_type,\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    donorStorage.insert(donor.id, donor);\n    return donor.id;\n}\nexports.addDonor = addDonor;\nfunction makePledge(payload) {\n    const donor = match(donorStorage.get(payload.donor_id), {\n        Some: (donor2)=>donor2\n        ,\n        None: ()=>({})\n    });\n    const patient = match(patientStorage.get(payload.patient_id), {\n        Some: (patient2)=>patient2\n        ,\n        None: ()=>({})\n    });\n    if (!donor.id || !patient.id) {\n        return {\n            msg: \"Invalid donor or patient ID\",\n            amount: 0\n        };\n    }\n    const pledge = {\n        id: v4_default(),\n        donor_id: donor.id,\n        patient_id: patient.id,\n        amount: payload.amount,\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    pledgeStorage.insert(pledge.id, pledge);\n    return {\n        msg: `Thank you for your pledge. Amount: $${payload.amount}`,\n        amount: parseFloat(payload.amount)\n    };\n}\nexports.makePledge = makePledge;\nfunction getPledgesForPatient(patient_id) {\n    const pledges = pledgeStorage.values().filter((pledge)=>pledge.patient_id === patient_id\n    );\n    if (pledges.length === 0) {\n        return Result.Err(\"No pledges found for the specified patient\");\n    }\n    return Result.Ok(pledges);\n}\nexports.getPledgesForPatient = getPledgesForPatient;\nfunction updatePatient(id, name, blood_type) {\n    const existingPatient = match(patientStorage.get(id), {\n        Some: (patient)=>patient\n        ,\n        None: ()=>({})\n    });\n    if (existingPatient.id) {\n        existingPatient.name = name;\n        existingPatient.blood_type = blood_type;\n        existingPatient.updated_at = Opt.Some(ic.time());\n        patientStorage.insert(existingPatient.id, existingPatient);\n        return existingPatient.id;\n    }\n    return \"Patient not found\";\n}\nexports.updatePatient = updatePatient;\nfunction updateDonor(id, name, blood_type) {\n    const existingDonor = match(donorStorage.get(id), {\n        Some: (donor)=>donor\n        ,\n        None: ()=>({})\n    });\n    if (existingDonor.id) {\n        existingDonor.name = name;\n        existingDonor.blood_type = blood_type;\n        existingDonor.updated_at = Opt.Some(ic.time());\n        donorStorage.insert(existingDonor.id, existingDonor);\n        return existingDonor.id;\n    }\n    return \"Donor not found\";\n}\nexports.updateDonor = updateDonor;\nfunction deletePatient(id) {\n    const existingPatient = match(patientStorage.get(id), {\n        Some: (patient)=>patient\n        ,\n        None: ()=>({})\n    });\n    if (existingPatient.id) {\n        patientStorage.remove(id);\n        return `Patient with ID: ${id} removed successfully`;\n    }\n    return \"Patient not found\";\n}\nexports.deletePatient = deletePatient;\nfunction deleteDonor(id) {\n    const existingDonor = match(donorStorage.get(id), {\n        Some: (donor)=>donor\n        ,\n        None: ()=>({})\n    });\n    if (existingDonor.id) {\n        donorStorage.remove(id);\n        return `Donor with ID: ${id} removed successfully`;\n    }\n    return \"Donor not found\";\n}\nexports.deleteDonor = deleteDonor;\nfunction updatePledge(id, amount) {\n    const existingPledge = match(pledgeStorage.get(id), {\n        Some: (pledge)=>pledge\n        ,\n        None: ()=>({})\n    });\n    if (existingPledge.id) {\n        existingPledge.amount = amount;\n        existingPledge.updated_at = Opt.Some(ic.time());\n        pledgeStorage.insert(existingPledge.id, existingPledge);\n        return `Pledge with ID: ${id} updated successfully`;\n    }\n    return \"Pledge not found\";\n}\nexports.updatePledge = updatePledge;\nfunction deletePledge(id) {\n    const existingPledge = match(pledgeStorage.get(id), {\n        Some: (pledge)=>pledge\n        ,\n        None: ()=>({})\n    });\n    if (existingPledge.id) {\n        pledgeStorage.remove(id);\n        return `Pledge with ID: ${id} removed successfully`;\n    }\n    return \"Pledge not found\";\n}\nexports.deletePledge = deletePledge;\nfunction findPotentialDonorsForPatient(patientBloodType) {\n    const potentialDonors = donorStorage.values().filter((donor)=>donor.blood_type === patientBloodType\n    );\n    if (potentialDonors.length === 0) {\n        return Result.Err(\"No potential donors found for the specified blood type\");\n    }\n    return Result.Ok(potentialDonors);\n}\nexports.findPotentialDonorsForPatient = findPotentialDonorsForPatient;\nfunction getPledgeSummary() {\n    const totalPledgedAmount = pledgeStorage.values().reduce((total, pledge)=>total + parseFloat(pledge.amount)\n    , 0);\n    return totalPledgedAmount;\n}\nexports.getPledgeSummary = getPledgeSummary;\nfunction updateHospitalInfo(id, name, location) {\n    const existingHospital = match(hospitalStorage.get(id), {\n        Some: (hospital)=>hospital\n        ,\n        None: ()=>({})\n    });\n    if (existingHospital.id) {\n        existingHospital.name = name;\n        existingHospital.location = location;\n        existingHospital.updated_at = Opt.Some(ic.time());\n        hospitalStorage.insert(existingHospital.id, existingHospital);\n        return existingHospital.id;\n    }\n    return \"Hospital not found\";\n}\nexports.updateHospitalInfo = updateHospitalInfo;\nfunction removeExpiredPledges(expiryThreshold) {\n    const currentTime = ic.time();\n    const expiredPledges = pledgeStorage.values().filter((pledge)=>currentTime - pledge.created_date > expiryThreshold\n    );\n    expiredPledges.forEach((pledge)=>pledgeStorage.remove(pledge.id)\n    );\n    return `${expiredPledges.length} expired pledges removed successfully`;\n}\nexports.removeExpiredPledges = removeExpiredPledges;\nvar organStorage = new StableBTreeMap(4, 44, 512);\nfunction addOrgan(name, donor_id, patient_id) {\n    const organ = {\n        id: v4_default(),\n        name,\n        donor_id,\n        patient_id,\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    organStorage.insert(organ.id, organ);\n    return organ.id;\n}\nexports.addOrgan = addOrgan;\nfunction getOrgans() {\n    const organs = organStorage.values();\n    if (organs.length === 0) {\n        return Result.Err(\"No organs found\");\n    }\n    return Result.Ok(organs);\n}\nexports.getOrgans = getOrgans;\nfunction updateOrgan(id, name) {\n    const existingOrgan = match(organStorage.get(id), {\n        Some: (organ)=>organ\n        ,\n        None: ()=>({})\n    });\n    if (existingOrgan.id) {\n        existingOrgan.name = name;\n        existingOrgan.updated_at = Opt.Some(ic.time());\n        organStorage.insert(existingOrgan.id, existingOrgan);\n        return existingOrgan.id;\n    }\n    return \"Organ not found\";\n}\nexports.updateOrgan = updateOrgan;\nfunction deleteOrgan(id) {\n    const existingOrgan = match(organStorage.get(id), {\n        Some: (organ)=>organ\n        ,\n        None: ()=>({})\n    });\n    if (existingOrgan.id) {\n        organStorage.remove(id);\n        return `Organ with ID: ${id} removed successfully`;\n    }\n    return \"Organ not found\";\n}\nexports.deleteOrgan = deleteOrgan;\nfunction findMatchingDonorsForPatient(patientBloodType, patientLocation) {\n    const matchingDonors = donorStorage.values().filter((donor)=>{\n        const hasMatchingBloodType = donor.blood_type === patientBloodType;\n        const isSameLocation = match(hospitalStorage.get(donor.id), {\n            Some: (hospital)=>hospital.location === patientLocation\n            ,\n            None: ()=>false\n        });\n        return hasMatchingBloodType && isSameLocation;\n    });\n    if (matchingDonors.length === 0) {\n        return Result.Err(\"No matching donors found for the specified criteria\");\n    }\n    return Result.Ok(matchingDonors);\n}\nexports.findMatchingDonorsForPatient = findMatchingDonorsForPatient;\nfunction getOrganDonorsForPatient(patient_id) {\n    const organDonors = organStorage.values().filter((organ)=>organ.patient_id === patient_id\n    );\n    if (organDonors.length === 0) {\n        return Result.Err(\"No organ donors found for the specified patient\");\n    }\n    const donorIds = Array.from(new Set(organDonors.map((organ)=>organ.donor_id\n    )));\n    const donors = donorIds.map((donorId)=>match(donorStorage.get(donorId), {\n            Some: (donor)=>donor\n            ,\n            None: ()=>({})\n        })\n    );\n    return Result.Ok(donors);\n}\nexports.getOrganDonorsForPatient = getOrganDonorsForPatient;\nfunction getOrgansDonatedByDonor(donor_id) {\n    const donatedOrgans = organStorage.values().filter((organ)=>organ.donor_id === donor_id\n    );\n    if (donatedOrgans.length === 0) {\n        return Result.Err(\"No organs found for the specified donor\");\n    }\n    return Result.Ok(donatedOrgans);\n}\nexports.getOrgansDonatedByDonor = getOrgansDonatedByDonor;\nfunction getOrgansReceivedByPatient(patient_id) {\n    const receivedOrgans = organStorage.values().filter((organ)=>organ.patient_id === patient_id\n    );\n    if (receivedOrgans.length === 0) {\n        return Result.Err(\"No organs found for the specified patient\");\n    }\n    return Result.Ok(receivedOrgans);\n}\nexports.getOrgansReceivedByPatient = getOrgansReceivedByPatient;\nvar medicalRecordStorage = new StableBTreeMap(5, 44, 512);\nfunction addMedicalRecord(patient_id, doctor_name, diagnosis, prescription) {\n    const medicalRecord = {\n        id: v4_default(),\n        patient_id,\n        doctor_name,\n        diagnosis,\n        prescription,\n        created_date: ic.time(),\n        updated_at: Opt.None\n    };\n    medicalRecordStorage.insert(medicalRecord.id, medicalRecord);\n    return medicalRecord.id;\n}\nexports.addMedicalRecord = addMedicalRecord;\nfunction getMedicalRecordsForPatient(patient_id) {\n    const medicalRecords = medicalRecordStorage.values().filter((record)=>record.patient_id === patient_id\n    );\n    if (medicalRecords.length === 0) {\n        return Result.Err(\"No medical records found for the specified patient\");\n    }\n    return Result.Ok(medicalRecords);\n}\nexports.getMedicalRecordsForPatient = getMedicalRecordsForPatient;\nfunction updateMedicalRecord(id, diagnosis, prescription) {\n    const existingRecord = match(medicalRecordStorage.get(id), {\n        Some: (record)=>record\n        ,\n        None: ()=>({})\n    });\n    if (existingRecord.id) {\n        existingRecord.diagnosis = diagnosis;\n        existingRecord.prescription = prescription;\n        existingRecord.updated_at = Opt.Some(ic.time());\n        medicalRecordStorage.insert(existingRecord.id, existingRecord);\n        return existingRecord.id;\n    }\n    return \"Medical record not found\";\n}\nexports.updateMedicalRecord = updateMedicalRecord;\nfunction deleteMedicalRecord(id) {\n    const existingRecord = match(medicalRecordStorage.get(id), {\n        Some: (record)=>record\n        ,\n        None: ()=>({})\n    });\n    if (existingRecord.id) {\n        medicalRecordStorage.remove(id);\n        return `Medical record with ID: ${id} removed successfully`;\n    }\n    return \"Medical record not found\";\n}\nexports.deleteMedicalRecord = deleteMedicalRecord;\nglobalThis.crypto = {\n    getRandomValues: ()=>{\n        let array = new Uint8Array(32);\n        for(let i10 = 0; i10 < array.length; i10++){\n            array[i10] = Math.floor(Math.random() * 256);\n        }\n        return array;\n    }\n};\n\n        ";
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
 thread_local! {
     static _CDK_RNG_REF_CELL : std::cell::RefCell < rand::rngs::StdRng > =
@@ -2549,6 +2549,28 @@ fn stable_b_tree_map_contains_key(
                 .try_into_vm_value(&mut *context)
                 .map_err(|vmc_err| vmc_err.to_js_error(None))
         }
+        4u8 => {
+            let wrapped_key = &StableBTreeMap4KeyType(
+                key_js_value.try_from_vm_value(&mut *context)?,
+            );
+            STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow().contains_key(wrapped_key)
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        5u8 => {
+            let wrapped_key = &StableBTreeMap5KeyType(
+                key_js_value.try_from_vm_value(&mut *context)?,
+            );
+            STABLE_B_TREE_MAP_5_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow().contains_key(wrapped_key)
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
         _ => {
             Err(
                 format!(
@@ -2612,6 +2634,28 @@ fn stable_b_tree_map_get(
                 key_js_value.try_from_vm_value(&mut *context)?,
             );
             STABLE_B_TREE_MAP_3_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow().get(wrapped_key)
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        4u8 => {
+            let wrapped_key = &StableBTreeMap4KeyType(
+                key_js_value.try_from_vm_value(&mut *context)?,
+            );
+            STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow().get(wrapped_key)
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        5u8 => {
+            let wrapped_key = &StableBTreeMap5KeyType(
+                key_js_value.try_from_vm_value(&mut *context)?,
+            );
+            STABLE_B_TREE_MAP_5_REF_CELL
                 .with(|stable_b_tree_map_ref_cell| {
                     stable_b_tree_map_ref_cell.borrow().get(wrapped_key)
                 })
@@ -2703,6 +2747,34 @@ fn stable_b_tree_map_insert(
                 .try_into_vm_value(&mut *context)
                 .map_err(|vmc_err| vmc_err.to_js_error(None))
         }
+        4u8 => {
+            let key = StableBTreeMap4KeyType(
+                key_js_value.try_from_vm_value(&mut *context)?,
+            );
+            let value = StableBTreeMap4ValueType(
+                value_js_value.try_from_vm_value(&mut *context)?,
+            );
+            STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow_mut().insert(key, value)
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        5u8 => {
+            let key = StableBTreeMap5KeyType(
+                key_js_value.try_from_vm_value(&mut *context)?,
+            );
+            let value = StableBTreeMap5ValueType(
+                value_js_value.try_from_vm_value(&mut *context)?,
+            );
+            STABLE_B_TREE_MAP_5_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow_mut().insert(key, value)
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
         _ => {
             Err(
                 format!(
@@ -2750,6 +2822,22 @@ fn stable_b_tree_map_is_empty(
         }
         3u8 => {
             STABLE_B_TREE_MAP_3_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow().is_empty()
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        4u8 => {
+            STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow().is_empty()
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        5u8 => {
+            STABLE_B_TREE_MAP_5_REF_CELL
                 .with(|stable_b_tree_map_ref_cell| {
                     stable_b_tree_map_ref_cell.borrow().is_empty()
                 })
@@ -2901,6 +2989,68 @@ fn stable_b_tree_map_items(
                     .into(),
             )
         }
+        4u8 => {
+            let items = STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell
+                        .borrow()
+                        .iter()
+                        .map(|(key_wrapper_type, value_wrapper_type)| {
+                            let key = key_wrapper_type
+                                .0
+                                .try_into_vm_value(&mut *context)
+                                .map_err(|vmc_err| vmc_err.to_js_error(None))?;
+                            let value = value_wrapper_type
+                                .0
+                                .try_into_vm_value(&mut *context)
+                                .map_err(|vmc_err| vmc_err.to_js_error(None))?;
+                            let tuple = vec![key, value];
+                            Ok(
+                                boa_engine::object::builtins::JsArray::from_iter(
+                                        tuple,
+                                        &mut *context,
+                                    )
+                                    .into(),
+                            )
+                        })
+                        .collect::<Result<Vec<_>, boa_engine::JsError>>()
+                })?;
+            Ok(
+                boa_engine::object::builtins::JsArray::from_iter(items, &mut *context)
+                    .into(),
+            )
+        }
+        5u8 => {
+            let items = STABLE_B_TREE_MAP_5_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell
+                        .borrow()
+                        .iter()
+                        .map(|(key_wrapper_type, value_wrapper_type)| {
+                            let key = key_wrapper_type
+                                .0
+                                .try_into_vm_value(&mut *context)
+                                .map_err(|vmc_err| vmc_err.to_js_error(None))?;
+                            let value = value_wrapper_type
+                                .0
+                                .try_into_vm_value(&mut *context)
+                                .map_err(|vmc_err| vmc_err.to_js_error(None))?;
+                            let tuple = vec![key, value];
+                            Ok(
+                                boa_engine::object::builtins::JsArray::from_iter(
+                                        tuple,
+                                        &mut *context,
+                                    )
+                                    .into(),
+                            )
+                        })
+                        .collect::<Result<Vec<_>, boa_engine::JsError>>()
+                })?;
+            Ok(
+                boa_engine::object::builtins::JsArray::from_iter(items, &mut *context)
+                    .into(),
+            )
+        }
         _ => {
             Err(
                 format!(
@@ -2970,6 +3120,30 @@ fn stable_b_tree_map_keys(
                 .try_into_vm_value(&mut *context)
                 .map_err(|vmc_err| vmc_err.to_js_error(None))
         }
+        4u8 => {
+            STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell
+                        .borrow()
+                        .iter()
+                        .map(|(key_wrapper_type, _)| key_wrapper_type.0)
+                        .collect::<Vec<_>>()
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        5u8 => {
+            STABLE_B_TREE_MAP_5_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell
+                        .borrow()
+                        .iter()
+                        .map(|(key_wrapper_type, _)| key_wrapper_type.0)
+                        .collect::<Vec<_>>()
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
         _ => {
             Err(
                 format!(
@@ -3017,6 +3191,22 @@ fn stable_b_tree_map_len(
         }
         3u8 => {
             STABLE_B_TREE_MAP_3_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow().len()
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        4u8 => {
+            STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow().len()
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        5u8 => {
+            STABLE_B_TREE_MAP_5_REF_CELL
                 .with(|stable_b_tree_map_ref_cell| {
                     stable_b_tree_map_ref_cell.borrow().len()
                 })
@@ -3092,6 +3282,28 @@ fn stable_b_tree_map_remove(
                 .try_into_vm_value(&mut *context)
                 .map_err(|vmc_err| vmc_err.to_js_error(None))
         }
+        4u8 => {
+            let key = StableBTreeMap4KeyType(
+                key_js_value.try_from_vm_value(&mut *context)?,
+            );
+            STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow_mut().remove(&key)
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        5u8 => {
+            let key = StableBTreeMap5KeyType(
+                key_js_value.try_from_vm_value(&mut *context)?,
+            );
+            STABLE_B_TREE_MAP_5_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell.borrow_mut().remove(&key)
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
         _ => {
             Err(
                 format!(
@@ -3151,6 +3363,30 @@ fn stable_b_tree_map_values(
         }
         3u8 => {
             STABLE_B_TREE_MAP_3_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell
+                        .borrow()
+                        .iter()
+                        .map(|(_, value_wrapper_type)| value_wrapper_type.0)
+                        .collect::<Vec<_>>()
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        4u8 => {
+            STABLE_B_TREE_MAP_4_REF_CELL
+                .with(|stable_b_tree_map_ref_cell| {
+                    stable_b_tree_map_ref_cell
+                        .borrow()
+                        .iter()
+                        .map(|(_, value_wrapper_type)| value_wrapper_type.0)
+                        .collect::<Vec<_>>()
+                })
+                .try_into_vm_value(&mut *context)
+                .map_err(|vmc_err| vmc_err.to_js_error(None))
+        }
+        5u8 => {
+            STABLE_B_TREE_MAP_5_REF_CELL
                 .with(|stable_b_tree_map_ref_cell| {
                     stable_b_tree_map_ref_cell
                         .borrow()
@@ -3494,7 +3730,21 @@ thread_local! {
     ic_stable_structures::DefaultMemoryImpl > > > =
     std::cell::RefCell::new(ic_stable_structures::StableBTreeMap::init(MEMORY_MANAGER_REF_CELL
     .with(| m | { m.borrow()
-    .get(ic_stable_structures::memory_manager::MemoryId::new(3u8)) }),));
+    .get(ic_stable_structures::memory_manager::MemoryId::new(3u8)) }),)); static
+    STABLE_B_TREE_MAP_4_REF_CELL : std::cell::RefCell <
+    ic_stable_structures::StableBTreeMap < StableBTreeMap4KeyType,
+    StableBTreeMap4ValueType, ic_stable_structures::memory_manager::VirtualMemory <
+    ic_stable_structures::DefaultMemoryImpl > > > =
+    std::cell::RefCell::new(ic_stable_structures::StableBTreeMap::init(MEMORY_MANAGER_REF_CELL
+    .with(| m | { m.borrow()
+    .get(ic_stable_structures::memory_manager::MemoryId::new(4u8)) }),)); static
+    STABLE_B_TREE_MAP_5_REF_CELL : std::cell::RefCell <
+    ic_stable_structures::StableBTreeMap < StableBTreeMap5KeyType,
+    StableBTreeMap5ValueType, ic_stable_structures::memory_manager::VirtualMemory <
+    ic_stable_structures::DefaultMemoryImpl > > > =
+    std::cell::RefCell::new(ic_stable_structures::StableBTreeMap::init(MEMORY_MANAGER_REF_CELL
+    .with(| m | { m.borrow()
+    .get(ic_stable_structures::memory_manager::MemoryId::new(5u8)) }),));
 }
 #[derive(
     candid::CandidType,
@@ -3893,6 +4143,206 @@ impl ic_stable_structures::Storable for StableBTreeMap3ValueType {
     }
 }
 impl ic_stable_structures::BoundedStorable for StableBTreeMap3ValueType {
+    const MAX_SIZE: u32 = 512u32;
+    const IS_FIXED_SIZE: bool = false;
+}
+#[derive(
+    candid::CandidType,
+    candid::Deserialize,
+    CdkActTryFromVmValue,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+    Clone
+)]
+struct StableBTreeMap4KeyType(String);
+impl CdkActTryIntoVmValue<&mut boa_engine::Context<'_>, boa_engine::JsValue>
+for StableBTreeMap4KeyType {
+    fn try_into_vm_value(
+        self,
+        context: &mut boa_engine::Context,
+    ) -> Result<boa_engine::JsValue, CdkActTryIntoVmValueError> {
+        Ok(self.0.try_into_vm_value(context)?)
+    }
+}
+impl ic_stable_structures::Storable for StableBTreeMap4KeyType {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        unwrap_or_trap(|| {
+            Ok(
+                std::borrow::Cow::Owned(
+                    candid::Encode!(self)
+                        .map_err(|candid_error| {
+                            RuntimeError::String(
+                                format!("CandidError: {}", candid_error.to_string()),
+                            )
+                        })?,
+                ),
+            )
+        })
+    }
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        unwrap_or_trap(|| {
+            candid::Decode!(& bytes, Self)
+                .map_err(|candid_error| {
+                    RuntimeError::String(
+                        format!("CandidError: {}", candid_error.to_string()),
+                    )
+                })
+        })
+    }
+}
+impl ic_stable_structures::BoundedStorable for StableBTreeMap4KeyType {
+    const MAX_SIZE: u32 = 44u32;
+    const IS_FIXED_SIZE: bool = false;
+}
+#[derive(
+    candid::CandidType,
+    candid::Deserialize,
+    CdkActTryFromVmValue,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+    Clone
+)]
+struct StableBTreeMap4ValueType(Organ);
+impl CdkActTryIntoVmValue<&mut boa_engine::Context<'_>, boa_engine::JsValue>
+for StableBTreeMap4ValueType {
+    fn try_into_vm_value(
+        self,
+        context: &mut boa_engine::Context,
+    ) -> Result<boa_engine::JsValue, CdkActTryIntoVmValueError> {
+        Ok(self.0.try_into_vm_value(context)?)
+    }
+}
+impl ic_stable_structures::Storable for StableBTreeMap4ValueType {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        unwrap_or_trap(|| {
+            Ok(
+                std::borrow::Cow::Owned(
+                    candid::Encode!(self)
+                        .map_err(|candid_error| {
+                            RuntimeError::String(
+                                format!("CandidError: {}", candid_error.to_string()),
+                            )
+                        })?,
+                ),
+            )
+        })
+    }
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        unwrap_or_trap(|| {
+            candid::Decode!(& bytes, Self)
+                .map_err(|candid_error| {
+                    RuntimeError::String(
+                        format!("CandidError: {}", candid_error.to_string()),
+                    )
+                })
+        })
+    }
+}
+impl ic_stable_structures::BoundedStorable for StableBTreeMap4ValueType {
+    const MAX_SIZE: u32 = 512u32;
+    const IS_FIXED_SIZE: bool = false;
+}
+#[derive(
+    candid::CandidType,
+    candid::Deserialize,
+    CdkActTryFromVmValue,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+    Clone
+)]
+struct StableBTreeMap5KeyType(String);
+impl CdkActTryIntoVmValue<&mut boa_engine::Context<'_>, boa_engine::JsValue>
+for StableBTreeMap5KeyType {
+    fn try_into_vm_value(
+        self,
+        context: &mut boa_engine::Context,
+    ) -> Result<boa_engine::JsValue, CdkActTryIntoVmValueError> {
+        Ok(self.0.try_into_vm_value(context)?)
+    }
+}
+impl ic_stable_structures::Storable for StableBTreeMap5KeyType {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        unwrap_or_trap(|| {
+            Ok(
+                std::borrow::Cow::Owned(
+                    candid::Encode!(self)
+                        .map_err(|candid_error| {
+                            RuntimeError::String(
+                                format!("CandidError: {}", candid_error.to_string()),
+                            )
+                        })?,
+                ),
+            )
+        })
+    }
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        unwrap_or_trap(|| {
+            candid::Decode!(& bytes, Self)
+                .map_err(|candid_error| {
+                    RuntimeError::String(
+                        format!("CandidError: {}", candid_error.to_string()),
+                    )
+                })
+        })
+    }
+}
+impl ic_stable_structures::BoundedStorable for StableBTreeMap5KeyType {
+    const MAX_SIZE: u32 = 44u32;
+    const IS_FIXED_SIZE: bool = false;
+}
+#[derive(
+    candid::CandidType,
+    candid::Deserialize,
+    CdkActTryFromVmValue,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+    Clone
+)]
+struct StableBTreeMap5ValueType(MedicalRecord);
+impl CdkActTryIntoVmValue<&mut boa_engine::Context<'_>, boa_engine::JsValue>
+for StableBTreeMap5ValueType {
+    fn try_into_vm_value(
+        self,
+        context: &mut boa_engine::Context,
+    ) -> Result<boa_engine::JsValue, CdkActTryIntoVmValueError> {
+        Ok(self.0.try_into_vm_value(context)?)
+    }
+}
+impl ic_stable_structures::Storable for StableBTreeMap5ValueType {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        unwrap_or_trap(|| {
+            Ok(
+                std::borrow::Cow::Owned(
+                    candid::Encode!(self)
+                        .map_err(|candid_error| {
+                            RuntimeError::String(
+                                format!("CandidError: {}", candid_error.to_string()),
+                            )
+                        })?,
+                ),
+            )
+        })
+    }
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        unwrap_or_trap(|| {
+            candid::Decode!(& bytes, Self)
+                .map_err(|candid_error| {
+                    RuntimeError::String(
+                        format!("CandidError: {}", candid_error.to_string()),
+                    )
+                })
+        })
+    }
+}
+impl ic_stable_structures::BoundedStorable for StableBTreeMap5ValueType {
     const MAX_SIZE: u32 = 512u32;
     const IS_FIXED_SIZE: bool = false;
 }
@@ -4343,6 +4793,463 @@ async fn _cdk_user_defined_getPledgesForPatient(
                     &boa_return_value,
                     &uuid,
                     "getPledgesForPatient",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::query(name = "findPotentialDonorsForPatient")]
+#[candid::candid_method(query, rename = "findPotentialDonorsForPatient")]
+async fn _cdk_user_defined_findPotentialDonorsForPatient(
+    _cdk_user_defined_patientBloodType: String,
+) -> (_AzleResult<Vec<Donor>, String>) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "findPotentialDonorsForPatient".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("findPotentialDonorsForPatient", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "findPotentialDonorsForPatient"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_patientBloodType
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "findPotentialDonorsForPatient",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::query(name = "getPledgeSummary")]
+#[candid::candid_method(query, rename = "getPledgeSummary")]
+async fn _cdk_user_defined_getPledgeSummary() -> (_CdkFloat64) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "getPledgeSummary".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("getPledgeSummary", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "getPledgeSummary"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(&boa_engine::JsValue::Null, &[], &mut boa_context)?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "getPledgeSummary",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::query(name = "getOrgans")]
+#[candid::candid_method(query, rename = "getOrgans")]
+async fn _cdk_user_defined_getOrgans() -> (_AzleResult<Vec<Organ>, String>) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "getOrgans".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("getOrgans", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "getOrgans"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(&boa_engine::JsValue::Null, &[], &mut boa_context)?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "getOrgans",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::query(name = "findMatchingDonorsForPatient")]
+#[candid::candid_method(query, rename = "findMatchingDonorsForPatient")]
+async fn _cdk_user_defined_findMatchingDonorsForPatient(
+    _cdk_user_defined_patientBloodType: String,
+    _cdk_user_defined_patientLocation: String,
+) -> (_AzleResult<Vec<Donor>, String>) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "findMatchingDonorsForPatient".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("findMatchingDonorsForPatient", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "findMatchingDonorsForPatient"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_patientBloodType
+                                .try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_patientLocation
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "findMatchingDonorsForPatient",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::query(name = "getOrganDonorsForPatient")]
+#[candid::candid_method(query, rename = "getOrganDonorsForPatient")]
+async fn _cdk_user_defined_getOrganDonorsForPatient(
+    _cdk_user_defined_patient_id: String,
+) -> (_AzleResult<Vec<Donor>, String>) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "getOrganDonorsForPatient".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("getOrganDonorsForPatient", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "getOrganDonorsForPatient"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_patient_id
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "getOrganDonorsForPatient",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::query(name = "getOrgansDonatedByDonor")]
+#[candid::candid_method(query, rename = "getOrgansDonatedByDonor")]
+async fn _cdk_user_defined_getOrgansDonatedByDonor(
+    _cdk_user_defined_donor_id: String,
+) -> (_AzleResult<Vec<Organ>, String>) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "getOrgansDonatedByDonor".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("getOrgansDonatedByDonor", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "getOrgansDonatedByDonor"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_donor_id
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "getOrgansDonatedByDonor",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::query(name = "getOrgansReceivedByPatient")]
+#[candid::candid_method(query, rename = "getOrgansReceivedByPatient")]
+async fn _cdk_user_defined_getOrgansReceivedByPatient(
+    _cdk_user_defined_patient_id: String,
+) -> (_AzleResult<Vec<Organ>, String>) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "getOrgansReceivedByPatient".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("getOrgansReceivedByPatient", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "getOrgansReceivedByPatient"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_patient_id
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "getOrgansReceivedByPatient",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::query(name = "getMedicalRecordsForPatient")]
+#[candid::candid_method(query, rename = "getMedicalRecordsForPatient")]
+async fn _cdk_user_defined_getMedicalRecordsForPatient(
+    _cdk_user_defined_patient_id: String,
+) -> (_AzleResult<Vec<MedicalRecord>, String>) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "getMedicalRecordsForPatient".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("getMedicalRecordsForPatient", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "getMedicalRecordsForPatient"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_patient_id
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "getMedicalRecordsForPatient",
                     false,
                 )?;
                 Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
@@ -4928,6 +5835,494 @@ async fn _cdk_user_defined_deletePledge(_cdk_user_defined_id: String) -> (String
             })
     })
 }
+#[ic_cdk_macros::update(name = "updateHospitalInfo")]
+#[candid::candid_method(update, rename = "updateHospitalInfo")]
+async fn _cdk_user_defined_updateHospitalInfo(
+    _cdk_user_defined_id: String,
+    _cdk_user_defined_name: String,
+    _cdk_user_defined_location: String,
+) -> (String) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "updateHospitalInfo".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("updateHospitalInfo", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "updateHospitalInfo"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_id.try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_name.try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_location
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "updateHospitalInfo",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::update(name = "removeExpiredPledges")]
+#[candid::candid_method(update, rename = "removeExpiredPledges")]
+async fn _cdk_user_defined_removeExpiredPledges(
+    _cdk_user_defined_expiryThreshold: _CdkFloat64,
+) -> (String) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "removeExpiredPledges".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("removeExpiredPledges", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "removeExpiredPledges"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_expiryThreshold
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "removeExpiredPledges",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::update(name = "addOrgan")]
+#[candid::candid_method(update, rename = "addOrgan")]
+async fn _cdk_user_defined_addOrgan(
+    _cdk_user_defined_name: String,
+    _cdk_user_defined_donor_id: String,
+    _cdk_user_defined_patient_id: String,
+) -> (String) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "addOrgan".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("addOrgan", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "addOrgan"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_name.try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_donor_id
+                                .try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_patient_id
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "addOrgan",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::update(name = "updateOrgan")]
+#[candid::candid_method(update, rename = "updateOrgan")]
+async fn _cdk_user_defined_updateOrgan(
+    _cdk_user_defined_id: String,
+    _cdk_user_defined_name: String,
+) -> (String) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "updateOrgan".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("updateOrgan", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "updateOrgan"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_id.try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_name.try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "updateOrgan",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::update(name = "deleteOrgan")]
+#[candid::candid_method(update, rename = "deleteOrgan")]
+async fn _cdk_user_defined_deleteOrgan(_cdk_user_defined_id: String) -> (String) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "deleteOrgan".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("deleteOrgan", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "deleteOrgan"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[_cdk_user_defined_id.try_into_vm_value(&mut boa_context)?],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "deleteOrgan",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::update(name = "addMedicalRecord")]
+#[candid::candid_method(update, rename = "addMedicalRecord")]
+async fn _cdk_user_defined_addMedicalRecord(
+    _cdk_user_defined_patient_id: String,
+    _cdk_user_defined_doctor_name: String,
+    _cdk_user_defined_diagnosis: String,
+    _cdk_user_defined_prescription: String,
+) -> (String) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "addMedicalRecord".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("addMedicalRecord", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "addMedicalRecord"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_patient_id
+                                .try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_doctor_name
+                                .try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_diagnosis
+                                .try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_prescription
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "addMedicalRecord",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::update(name = "updateMedicalRecord")]
+#[candid::candid_method(update, rename = "updateMedicalRecord")]
+async fn _cdk_user_defined_updateMedicalRecord(
+    _cdk_user_defined_id: String,
+    _cdk_user_defined_diagnosis: String,
+    _cdk_user_defined_prescription: String,
+) -> (String) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "updateMedicalRecord".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("updateMedicalRecord", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "updateMedicalRecord"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[
+                            _cdk_user_defined_id.try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_diagnosis
+                                .try_into_vm_value(&mut boa_context)?,
+                            _cdk_user_defined_prescription
+                                .try_into_vm_value(&mut boa_context)?,
+                        ],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "updateMedicalRecord",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
+#[ic_cdk_macros::update(name = "deleteMedicalRecord")]
+#[candid::candid_method(update, rename = "deleteMedicalRecord")]
+async fn _cdk_user_defined_deleteMedicalRecord(
+    _cdk_user_defined_id: String,
+) -> (String) {
+    unwrap_or_trap(|| {
+        BOA_CONTEXT_REF_CELL
+            .with(|boa_context_ref_cell| {
+                let mut boa_context = boa_context_ref_cell.borrow_mut();
+                let uuid = uuid::Uuid::new_v4().to_string();
+                UUID_REF_CELL
+                    .with(|uuid_ref_cell| {
+                        let mut uuid_mut = uuid_ref_cell.borrow_mut();
+                        *uuid_mut = uuid.clone();
+                    });
+                METHOD_NAME_REF_CELL
+                    .with(|method_name_ref_cell| {
+                        let mut method_name_mut = method_name_ref_cell.borrow_mut();
+                        *method_name_mut = "deleteMedicalRecord".to_string();
+                    });
+                MANUAL_REF_CELL
+                    .with(|manual_ref_cell| {
+                        let mut manual_mut = manual_ref_cell.borrow_mut();
+                        *manual_mut = false;
+                    });
+                let exports_js_value = boa_context
+                    .eval(boa_engine::Source::from_bytes("exports"))?;
+                let exports_js_object = exports_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::TypeError(
+                        "'exports' is not an object".to_string(),
+                    ))?;
+                let function_js_value = exports_js_object
+                    .get("deleteMedicalRecord", &mut boa_context)?;
+                let function_js_object = function_js_value
+                    .as_object()
+                    .ok_or_else(|| RuntimeError::ReferenceError(
+                        format!("{} is not defined", "deleteMedicalRecord"),
+                    ))?;
+                let boa_return_value = function_js_object
+                    .call(
+                        &boa_engine::JsValue::Null,
+                        &[_cdk_user_defined_id.try_into_vm_value(&mut boa_context)?],
+                        &mut boa_context,
+                    )?;
+                let final_return_value = async_await_result_handler(
+                    &mut boa_context,
+                    &boa_return_value,
+                    &uuid,
+                    "deleteMedicalRecord",
+                    false,
+                )?;
+                Ok(final_return_value.try_from_vm_value(&mut *boa_context)?)
+            })
+    })
+}
 #[derive(
     serde::Deserialize,
     Debug,
@@ -5037,6 +6432,47 @@ struct PledgePayload {
 struct PledgeResponse {
     msg: Box<String>,
     amount: Box<_CdkFloat64>,
+}
+#[derive(
+    serde::Deserialize,
+    Debug,
+    candid::CandidType,
+    Clone,
+    CdkActTryIntoVmValue,
+    CdkActTryFromVmValue,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq
+)]
+struct Organ {
+    id: Box<String>,
+    name: Box<String>,
+    donor_id: Box<String>,
+    patient_id: Box<String>,
+    created_date: Box<u64>,
+    updated_at: Box<Option<u64>>,
+}
+#[derive(
+    serde::Deserialize,
+    Debug,
+    candid::CandidType,
+    Clone,
+    CdkActTryIntoVmValue,
+    CdkActTryFromVmValue,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq
+)]
+struct MedicalRecord {
+    id: Box<String>,
+    patient_id: Box<String>,
+    doctor_name: Box<String>,
+    diagnosis: Box<String>,
+    prescription: Box<String>,
+    created_date: Box<u64>,
+    updated_at: Box<Option<u64>>,
 }
 type NotifyResult = (_AzleResult<(), RejectionCode>);
 type Stable64GrowResult = (_AzleResult<u64, StableMemoryError>);

@@ -11,7 +11,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.deletePledge = exports.updatePledge = exports.deleteDonor = exports.deletePatient = exports.updateDonor = exports.updatePatient = exports.getPledgesForPatient = exports.makePledge = exports.addDonor = exports.addPatient = exports.getDonors = exports.getPatients = exports.getHospitals = exports.initBloodDrive = exports.Principal = void 0;
+exports.deleteMedicalRecord = exports.updateMedicalRecord = exports.getMedicalRecordsForPatient = exports.addMedicalRecord = exports.getOrgansReceivedByPatient = exports.getOrgansDonatedByDonor = exports.getOrganDonorsForPatient = exports.findMatchingDonorsForPatient = exports.deleteOrgan = exports.updateOrgan = exports.getOrgans = exports.addOrgan = exports.removeExpiredPledges = exports.updateHospitalInfo = exports.getPledgeSummary = exports.findPotentialDonorsForPatient = exports.deletePledge = exports.updatePledge = exports.deleteDonor = exports.deletePatient = exports.updateDonor = exports.updatePatient = exports.getPledgesForPatient = exports.makePledge = exports.addDonor = exports.addPatient = exports.getDonors = exports.getPatients = exports.getHospitals = exports.initBloodDrive = exports.Principal = void 0;
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -1328,6 +1328,200 @@ function deletePledge(id) {
     return "Pledge not found";
 }
 exports.deletePledge = deletePledge;
+function findPotentialDonorsForPatient(patientBloodType) {
+    const potentialDonors = donorStorage.values().filter((donor)=>donor.blood_type === patientBloodType
+    );
+    if (potentialDonors.length === 0) {
+        return Result.Err("No potential donors found for the specified blood type");
+    }
+    return Result.Ok(potentialDonors);
+}
+exports.findPotentialDonorsForPatient = findPotentialDonorsForPatient;
+function getPledgeSummary() {
+    const totalPledgedAmount = pledgeStorage.values().reduce((total, pledge)=>total + parseFloat(pledge.amount)
+    , 0);
+    return totalPledgedAmount;
+}
+exports.getPledgeSummary = getPledgeSummary;
+function updateHospitalInfo(id, name, location) {
+    const existingHospital = match(hospitalStorage.get(id), {
+        Some: (hospital)=>hospital
+        ,
+        None: ()=>({})
+    });
+    if (existingHospital.id) {
+        existingHospital.name = name;
+        existingHospital.location = location;
+        existingHospital.updated_at = Opt.Some(ic.time());
+        hospitalStorage.insert(existingHospital.id, existingHospital);
+        return existingHospital.id;
+    }
+    return "Hospital not found";
+}
+exports.updateHospitalInfo = updateHospitalInfo;
+function removeExpiredPledges(expiryThreshold) {
+    const currentTime = ic.time();
+    const expiredPledges = pledgeStorage.values().filter((pledge)=>currentTime - pledge.created_date > expiryThreshold
+    );
+    expiredPledges.forEach((pledge)=>pledgeStorage.remove(pledge.id)
+    );
+    return `${expiredPledges.length} expired pledges removed successfully`;
+}
+exports.removeExpiredPledges = removeExpiredPledges;
+var organStorage = new StableBTreeMap(4, 44, 512);
+function addOrgan(name, donor_id, patient_id) {
+    const organ = {
+        id: v4_default(),
+        name,
+        donor_id,
+        patient_id,
+        created_date: ic.time(),
+        updated_at: Opt.None
+    };
+    organStorage.insert(organ.id, organ);
+    return organ.id;
+}
+exports.addOrgan = addOrgan;
+function getOrgans() {
+    const organs = organStorage.values();
+    if (organs.length === 0) {
+        return Result.Err("No organs found");
+    }
+    return Result.Ok(organs);
+}
+exports.getOrgans = getOrgans;
+function updateOrgan(id, name) {
+    const existingOrgan = match(organStorage.get(id), {
+        Some: (organ)=>organ
+        ,
+        None: ()=>({})
+    });
+    if (existingOrgan.id) {
+        existingOrgan.name = name;
+        existingOrgan.updated_at = Opt.Some(ic.time());
+        organStorage.insert(existingOrgan.id, existingOrgan);
+        return existingOrgan.id;
+    }
+    return "Organ not found";
+}
+exports.updateOrgan = updateOrgan;
+function deleteOrgan(id) {
+    const existingOrgan = match(organStorage.get(id), {
+        Some: (organ)=>organ
+        ,
+        None: ()=>({})
+    });
+    if (existingOrgan.id) {
+        organStorage.remove(id);
+        return `Organ with ID: ${id} removed successfully`;
+    }
+    return "Organ not found";
+}
+exports.deleteOrgan = deleteOrgan;
+function findMatchingDonorsForPatient(patientBloodType, patientLocation) {
+    const matchingDonors = donorStorage.values().filter((donor)=>{
+        const hasMatchingBloodType = donor.blood_type === patientBloodType;
+        const isSameLocation = match(hospitalStorage.get(donor.id), {
+            Some: (hospital)=>hospital.location === patientLocation
+            ,
+            None: ()=>false
+        });
+        return hasMatchingBloodType && isSameLocation;
+    });
+    if (matchingDonors.length === 0) {
+        return Result.Err("No matching donors found for the specified criteria");
+    }
+    return Result.Ok(matchingDonors);
+}
+exports.findMatchingDonorsForPatient = findMatchingDonorsForPatient;
+function getOrganDonorsForPatient(patient_id) {
+    const organDonors = organStorage.values().filter((organ)=>organ.patient_id === patient_id
+    );
+    if (organDonors.length === 0) {
+        return Result.Err("No organ donors found for the specified patient");
+    }
+    const donorIds = Array.from(new Set(organDonors.map((organ)=>organ.donor_id
+    )));
+    const donors = donorIds.map((donorId)=>match(donorStorage.get(donorId), {
+            Some: (donor)=>donor
+            ,
+            None: ()=>({})
+        })
+    );
+    return Result.Ok(donors);
+}
+exports.getOrganDonorsForPatient = getOrganDonorsForPatient;
+function getOrgansDonatedByDonor(donor_id) {
+    const donatedOrgans = organStorage.values().filter((organ)=>organ.donor_id === donor_id
+    );
+    if (donatedOrgans.length === 0) {
+        return Result.Err("No organs found for the specified donor");
+    }
+    return Result.Ok(donatedOrgans);
+}
+exports.getOrgansDonatedByDonor = getOrgansDonatedByDonor;
+function getOrgansReceivedByPatient(patient_id) {
+    const receivedOrgans = organStorage.values().filter((organ)=>organ.patient_id === patient_id
+    );
+    if (receivedOrgans.length === 0) {
+        return Result.Err("No organs found for the specified patient");
+    }
+    return Result.Ok(receivedOrgans);
+}
+exports.getOrgansReceivedByPatient = getOrgansReceivedByPatient;
+var medicalRecordStorage = new StableBTreeMap(5, 44, 512);
+function addMedicalRecord(patient_id, doctor_name, diagnosis, prescription) {
+    const medicalRecord = {
+        id: v4_default(),
+        patient_id,
+        doctor_name,
+        diagnosis,
+        prescription,
+        created_date: ic.time(),
+        updated_at: Opt.None
+    };
+    medicalRecordStorage.insert(medicalRecord.id, medicalRecord);
+    return medicalRecord.id;
+}
+exports.addMedicalRecord = addMedicalRecord;
+function getMedicalRecordsForPatient(patient_id) {
+    const medicalRecords = medicalRecordStorage.values().filter((record)=>record.patient_id === patient_id
+    );
+    if (medicalRecords.length === 0) {
+        return Result.Err("No medical records found for the specified patient");
+    }
+    return Result.Ok(medicalRecords);
+}
+exports.getMedicalRecordsForPatient = getMedicalRecordsForPatient;
+function updateMedicalRecord(id, diagnosis, prescription) {
+    const existingRecord = match(medicalRecordStorage.get(id), {
+        Some: (record)=>record
+        ,
+        None: ()=>({})
+    });
+    if (existingRecord.id) {
+        existingRecord.diagnosis = diagnosis;
+        existingRecord.prescription = prescription;
+        existingRecord.updated_at = Opt.Some(ic.time());
+        medicalRecordStorage.insert(existingRecord.id, existingRecord);
+        return existingRecord.id;
+    }
+    return "Medical record not found";
+}
+exports.updateMedicalRecord = updateMedicalRecord;
+function deleteMedicalRecord(id) {
+    const existingRecord = match(medicalRecordStorage.get(id), {
+        Some: (record)=>record
+        ,
+        None: ()=>({})
+    });
+    if (existingRecord.id) {
+        medicalRecordStorage.remove(id);
+        return `Medical record with ID: ${id} removed successfully`;
+    }
+    return "Medical record not found";
+}
+exports.deleteMedicalRecord = deleteMedicalRecord;
 globalThis.crypto = {
     getRandomValues: ()=>{
         let array = new Uint8Array(32);
